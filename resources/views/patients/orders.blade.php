@@ -15,7 +15,7 @@
                 <th colspan="9">GESTIMEDICAL SAS . NIT 900.644.246-3</th>
             </tr>
             <tr>
-                <th colspan="9">FACTURA # ASI - {{ $invoice_number }}</th>
+                <th colspan="9">FACTURA # GML - {{ $invoice_number }}</th>
             </tr>
         </thead>
         <tbody>
