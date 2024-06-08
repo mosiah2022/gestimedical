@@ -27,7 +27,10 @@ class PatientDiagnosticController extends Controller
     {
         return response()->json(
             new PatientDiagnosticCollection(
-                $this->patient_diagnostic->orderBy('patient_id', 'desc')->get()
+                $this->patient_diagnostic
+                ->where('company_id',  intval(session('company_id')))
+                ->orderBy('patient_id', 'desc')
+                ->get()
             )
         );
     }
@@ -40,6 +43,7 @@ class PatientDiagnosticController extends Controller
      */
     public function store(PatientDiagnosticRequest $request)
     {
+        $request->merge(['company_id' => intval(session('company'))]);
         $diagnostics = $this->patient_diagnostic->create($request->all());
         return response()->json(new PatientDiagnosticResource($diagnostics), 200);
     }

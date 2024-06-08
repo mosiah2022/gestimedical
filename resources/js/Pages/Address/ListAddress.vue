@@ -50,8 +50,8 @@ export default {
     },
     data() {
         return {
-            address: [],
-            loading1: null,
+            address: null,
+            loading1: true,
             filter: null,
             filters1: null,
             filters2: {
@@ -66,6 +66,7 @@ export default {
         async getAddress() {
             await axios.get('api/patient_addresses').then((res) => {
                 this.address = res.data
+                this.loading1 = false;
             })
         },
         async destroyAddress(id) {

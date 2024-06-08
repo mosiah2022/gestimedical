@@ -30,7 +30,10 @@ class InvoiceController extends Controller
     {
         return response()->json(
             new InvoiceCollection(
-                $this->invoice->orderBy('id','desc')->get()
+                $this->invoice
+                ->where('company_id', intval(session('company')))
+                ->orderBy('id','desc')
+                ->get()
             )
         );
     }
@@ -74,7 +77,7 @@ class InvoiceController extends Controller
         //particular case change de invoice_number on PatientLm
         //becouse the relationship is with the number directly
         //maybe not is a good practice but maybe i gonna change soomly
-        $invoice_order = PatientLm::where('invoice_number',$invoice_number)->update(['invoice_number'=>$request->invoice_number]);
+        PatientLm::where('invoice_number',$invoice_number)->update(['invoice_number'=>$request->invoice_number]);
         $invoice->update($request->all());
         return response()->json(new InvoiceResource($invoice));
     }

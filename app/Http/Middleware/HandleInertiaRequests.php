@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -33,9 +34,12 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request)
     {
+        $getCompanyName = Company::find($request->session()->get('company_id'));
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user(),
+                'company' => isset($getCompanyName) > 0 ? $getCompanyName->name : ''
             ],
         ]);
     }

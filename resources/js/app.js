@@ -33,6 +33,8 @@ import Slider from "primevue/slider";
 import ProgressSpinner from 'primevue/progressspinner';
 import FileUpload from 'primevue/fileupload';
 import Message from 'primevue/message';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Asispharma';
 const emitter = mitt();
@@ -62,6 +64,8 @@ createInertiaApp({
             .component('ProgressSpinner', ProgressSpinner)
             .component('FileUpload', FileUpload)
             .component('Message', Message)
+            .component('TabView', TabView)
+            .component('TabPanel', TabPanel)
             .use(plugin)
             .use(PrimeVue)
             .use(ToastService)

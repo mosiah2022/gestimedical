@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Invoice;
 use App\Models\PatientLmDetail;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
@@ -18,6 +19,8 @@ use \Maatwebsite\Excel\Sheet;
 
 class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSize, WithStyles, WithCustomValueBinder
 {
+    public $invoice;
+
     public function bindValue(Cell $cell, $value)
     {
         if (is_numeric($value)) {
@@ -32,6 +35,7 @@ class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSiz
 
     public function styles(Worksheet $sheet)
     {
+
         $styleArray = [
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
@@ -76,9 +80,13 @@ class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSiz
             return $query->where('invoice_number',$this->invoice);
         })->get()->groupBy('order.id');
 
+        $getCompany = Invoice::where('invoice_number', $this->invoice)->with(['company'])->first();
+        $nameCompany = $getCompany->company->name;
+
         return view('patients.orders', [
             'orders' => $query,
-            'invoice_number' => $this->invoice
+            'invoice_number' => $this->invoice,
+            'company' => $nameCompany
         ]);
     }
 }

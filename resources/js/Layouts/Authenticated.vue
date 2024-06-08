@@ -11,6 +11,7 @@
                                 <Link :href="route('dashboard')">
                                     <BreezeApplicationLogo class="block h-9 w-auto" />
                                 </Link>
+                                <h6 class="mx-4 text-sm font-normal"> Compañia: {{ $page.props.auth.company }}</h6>
                             </div>
 
                             <!-- Navigation Links -->

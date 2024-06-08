@@ -23,11 +23,10 @@
                             <Column field="first_name" header="Nombre"></Column>
                             <Column field="last_name" header="Apellido"></Column>
                             <Column field="personal_id" header="Identificación"></Column>
-                            <Column field="lm_code" header="LM"></Column>
+                            <Column field="lm_code" header="Código"></Column>
                             <Column bodyStyle="justify-center" header="Acción"
                                     headerStyle="width: 14rem; justify-center">
                                 <template #body="slotProps">
-                                    <PrimeButton @click="newLm(slotProps.data)" icon="pi pi-tags" class="btn_lms" title="Cargar Lm" />
                                     <PrimeButton @click="editOrder(slotProps.data.id,slotProps.data.patient_id)" icon="pi pi-pencil" class="btn_edit" title="Editar orden" />
                                     <PrimeButton @click="deleteOrder(slotProps.data.id,slotProps.data.patient_id)" icon="pi pi-trash" class="btn_delete" title="Eliminar orden" />
                                 </template>
@@ -79,10 +78,6 @@ export default {
             const res = await axios.get(`/api/findOrders/${this.form.search}`).then((res) => {
                 this.orders = res.data;
             })
-        },
-        async newLm(data){
-            this.createLm = data.lm_code,
-            this.displayLm = true
         },
         async editOrder(id, patientId){
             this.editId = id

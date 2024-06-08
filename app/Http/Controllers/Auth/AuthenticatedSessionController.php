@@ -34,6 +34,9 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request)
     {
         $request->authenticate();
+        $company = $request->input('company_id');
+        $request->session()->put('company_id', $company);
+        $request->session()->put('company', $company);
 
         $request->session()->regenerate();
 

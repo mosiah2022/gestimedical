@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Product as ProductResource;
-use App\Http\Resources\ProductCollection;
-use App\Models\Product;
 use Carbon\Carbon;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductCollection;
 
+use App\Http\Resources\Product as ProductResource;
 use App\Http\Requests\Products\Product as ProductRequest;
 use App\Http\Requests\Products\ProductUpdate as ProductUpdateRequest;
 
@@ -25,13 +26,31 @@ class ProductController extends Controller
      *
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(
-            new ProductCollection(
-                $this->product->orderBy('name', 'asc')->get()
-            )
-        );
+        $companyId = intval(session('company'));
+        $perPage = $request->input('perPage', 10);
+        $currentPage = $request->input('page', 1);
+        $globalFilter = $request->input('filters', '');
+    
+        $query = Product::where('company_id', $companyId);
+    
+        if ($globalFilter) {
+            $query->where(function ($q) use ($globalFilter) {
+                $q->where('name', 'like', '%' . $globalFilter . '%');
+            });
+        }
+    
+        $totalRecords = $query->count();
+    
+        $products = $query->orderBy('name', 'asc')->paginate($perPage, ['*'], 'page', $currentPage);
+        $totalPages = ceil($totalRecords / $perPage);
+    
+        return response()->json([
+            'products' => new ProductCollection($products),
+            'totalRecords' => $totalRecords,
+            'totalPages' => $totalPages,
+        ]);
     }
 
     /**
@@ -42,7 +61,10 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request): JsonResponse
     {
+        $company = intval(session('company'));
         $request->merge(['date_boarding' => Carbon::parse($request->date_boarding)->toDateString()]);
+        $request->merge(['company_id' => $company]);
+        
         $product = $this->product->create($request->all());
         return response()->json(new ProductResource($product), 201);
     }

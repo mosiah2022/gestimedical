@@ -26,7 +26,10 @@ class PatientAddressController extends Controller
     {
         return response()->json(
             new PatientAddressCollection(
-                $this->patient_address->orderBy('patient_id', 'desc')->get()
+                $this->patient_address
+                ->where('company_id',  intval(session('company')))
+                ->orderBy('patient_id', 'desc')
+                ->get()
             )
         );
     }
@@ -39,6 +42,7 @@ class PatientAddressController extends Controller
      */
     public function store(PatientAddressRequest $request)
     {
+        $request->merge(['company_id' => intval(session('company'))]);
         $patient = $this->patient_address->create($request->all());
         return response()->json(new PatientAddressResource($patient), 200);
     }

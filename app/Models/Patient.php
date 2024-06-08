@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Patient extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'company_id',
         'first_name',
         'last_name',
         'personal_id',
@@ -32,6 +34,11 @@ class Patient extends Model
 
     public function patient_phone() {
         return $this->hasMany(PatientAdress::class)->where('category','phone');
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     //Query Scope

@@ -38,7 +38,10 @@ class PatientLmController extends Controller
     {
         return response()->json(
             new PatientLmCollection(
-                $this->patient_lm->orderBy('id','desc')->get()
+                $this->patient_lm
+                ->where('company_id', intval(session('company')))
+                ->orderBy('id','desc')
+                ->get()
             )
         );
     }
@@ -51,6 +54,7 @@ class PatientLmController extends Controller
      */
     public function store(PatientLmRequest $request)
     {
+        $request->merge(['company_id' => intval(session('company'))]);
         $request->merge(['date_ini' => Carbon::parse($request->date_ini)->toDateString()]);
         $request->merge(['date_end' => Carbon::parse($request->date_end)->toDateString()]);
 
@@ -123,8 +127,8 @@ class PatientLmController extends Controller
     public function destroy(PatientLm $patient_lm)
     {
         $patientDetails  = PatientLmDetail::where('order_id',$patient_lm->id)->count();
-        $lmcode = PatientLm::select('lm_code')->where('id',$patient_lm->id)->first();
-        $preinvoice = PreInvoice::where('lm_code',$lmcode['lm_code'])->count();
+        $lmcode          = PatientLm::select('lm_code')->where('id',$patient_lm->id)->first();
+        $preinvoice      = PreInvoice::where('lm_code',$lmcode['lm_code'])->count();
 
         if($preinvoice > 0 && $patientDetails > 0) {
             PreInvoice::where('lm_code',$lmcode['lm_code'])->delete();
@@ -168,6 +172,7 @@ class PatientLmController extends Controller
                           ->select('patient_lms.lm_code','patient_lms.date_ini',DB::raw('count(*) as total_detail'))
                           ->where('status','pending')
                           ->whereBetween('patient_lms.date_ini', [$dateini,$dateend])
+                          ->where('company_id', intval(session('company')))
                           ->groupBy('patient_lms.lm_code','patient_lms.date_ini')
                           ->get();
 
@@ -181,7 +186,7 @@ class PatientLmController extends Controller
     }
 
     public function getOrdersCheck() {
-        $getOrders = PatientLm::where('status', 'proccess')->get();
+        $getOrders = PatientLm::where('status', 'proccess')->where('company_id', intval(session('company')))->get();
 
         if(count($getOrders)>0) {
             return response()->json(

@@ -25,7 +25,7 @@
                     </div>
                     <div class="p-6 bg-white border-b border-gray-200" v-if="orders.length > 0">
                         <DataTable  :value="orders" dataKey="id" responsiveLayout="scroll" :paginate="true" :rows="20">
-                            <Column field="lm_code" header="LM"></Column>
+                            <Column field="lm_code" header="Código"></Column>
                             <Column field="date_ini" header="Fecha de la orden"></Column>
                             <Column field="total_detail"  header="Total"></Column>
                             <Column>

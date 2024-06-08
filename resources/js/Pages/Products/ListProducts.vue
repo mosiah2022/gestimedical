@@ -1,23 +1,27 @@
 <template>
     <Card>
         <template #header>
-            <PrimeButton @click="createProduct" class="add-btn" icon="pi pi-plus" title="nuevo" />
+            <div class="flex justify-end p-2">
+                <PrimeButton @click="createProduct" class="add-btn" icon="pi pi-plus" title="nuevo" />
+            </div>
         </template>
         <template #title>
             <h4>Listado de productos</h4>
         </template>
         <template #content>
-            <DataTable v-model:filters="filters1" :value="products" dataKey="id"
-                       responsiveLayaout="scroll"
-                       :paginator="true"
-                       :rows="10"
-                       :loading="loading1"
-                       :globalFilterFields="['global','name']">
+            <DataTable v-model:filters="filters1" :value="products" :totalRecords="totalRecords" dataKey="id"
+                    lazy paginator
+                    responsiveLayout="scroll"
+                    :paginator="true"
+                    :rows="perPage"
+                    :loading="loading1"
+                    :globalFilterFields="['global', 'name']"
+                    @page="handlePageChange">
                 <template #header>
                     <div class="flex justify-content-center">
                         <span class="p-input-icon-left w-full">
                             <i class="pi pi-search" />
-                            <InputText v-model="filters1['global'].value" placeholder="Buscar" class="w-full" />
+                            <InputText v-model="filters1.global.value" placeholder="Buscar" class="w-full" @input="handleFilterChange"/>
                         </span>
                     </div>
                 </template>
@@ -45,33 +49,61 @@ import ProductForm from "@/Components/Products/ProductForm";
 import Swal from 'sweetalert2'
 import axios from 'axios';
 import {FilterMatchMode, FilterOperator} from "primevue/api";
+import debounce from 'lodash/debounce';
 
 export default {
-    name: "ListProducts",
-    data () {
-        return {
-            products: null,
-            filter: null,
-            filters1: null,
-            filters2: {
-                'global': {value:null, matchMode: FilterMatchMode.CONTAINS},
-                'name': {value:null, matchMode: FilterMatchMode.STARTS_WITH}
-            },
-            editId: null,
-            display: false,
-            loading1: true
-        }
-    },
-    components: {
-        ProductForm
-    },
-    methods: {
-        async getProducts() {
-            await axios.get('api/products').then((res) => {
-                this.products = res.data
+  data() {
+    return {
+      products: [],
+      totalRecords: 0,
+      currentPage: 1,
+      perPage: 10,
+      loading1: false,
+      filters1: {
+        global: { value: '' }
+      },
+      lazyParams: {
+        first: 0,
+        rows: 10,
+        sortField: null,
+        sortOrder: null,
+        filters: {}
+      }
+    };
+  },
+  methods: {
+        async loadLazyData() {
+            this.loading1 = true;
+            try {
+                const response = await axios.get('api/products', {
+                params: {
+                    page: this.currentPage,
+                    perPage: this.lazyParams.rows,
+                    filters: this.filters1.global.value
+                }
+                });
+                this.products = response.data.products;
+                this.totalRecords = response.data.totalRecords;
                 this.loading1 = false;
-            })
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                this.loading1 = false;
+            }
         },
+        handlePageChange(event) {
+            this.lazyParams.first = event.first;
+            this.lazyParams.rows = event.rows;
+            this.currentPage = Math.floor(event.first / event.rows) + 1; // Usamos Math.floor para asegurarnos de que la página es correcta
+            this.loadLazyData();
+        },
+        handleFilterChange() {
+            this.currentPage = 1; // Reset page to 1 when a new filter is applied
+            this.lazyParams.first = 0;
+            this.debouncedLoadLazyData();
+        },
+        debouncedLoadLazyData: debounce(function() {
+            this.loadLazyData();
+        }, 500),
         async createProduct () {
             this.editId = null
             this.display = true
@@ -109,9 +141,9 @@ export default {
         this.initFilters1()
     },
     mounted() {
-        this.getProducts()
+        this.loadLazyData()
         this.emitter.on('products_reload', () => {
-            this.getProducts()
+            this.loadLazyData()
             this.display = false
             this.$toast.add({
                 severity:'success', summary: 'SUCCESS!',

@@ -26,7 +26,8 @@ class Product extends FormRequest
         return [
             'name'            => ['required'],
             'price'           => ['required'],
-            'presentation_id' => ['required']
+            'presentation_id' => ['required'],
+            'company_id'      => ['required|integer'],
         ];
     }
 
@@ -35,7 +36,8 @@ class Product extends FormRequest
         return [
             'name.required'            => 'Debe ingresar un nombre al producto',
             'price.required'           => 'Ingrese precio del producto',
-            'presentation_id.required' => 'Debe seleccionar una presentacion del producto'
+            'presentation_id.required' => 'Debe seleccionar una presentacion del producto',
+            'company_id.required'      => 'Debe loguearse seleccionando una empresa',
         ] ;
     }
 }

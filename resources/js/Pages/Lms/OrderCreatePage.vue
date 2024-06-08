@@ -67,7 +67,7 @@
 
         <div class="formgrid grid" v-if="displayLms === true">
             <div class="field col">
-                <label>Código autorización - LM | EC</label>
+                <label>Código autorización - LM | EC | ARL</label>
                 <InputText v-model="form.lm_id" class="inputfield w-full" />
                 <small class="text-red-500">{{ error_lm_code }}</small>
             </div>

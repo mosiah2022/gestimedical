@@ -2,62 +2,49 @@
     <Head title="Dashboard" />
 
     <BreezeAuthenticatedLayout>
-
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-20">
-                <div class="bg-transparent overflow-hidden shadow-sm sm:rounded-lg justify-center">
-                    <div class="grid">
-                        <div class="col-12">
-                            <PrimeButton
-                                label="Administrar Medicamentos"
-                                class="p-button-secondary w-full"
-                                @click="activateProducts"
-                            />
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Dashboard
+            </h2>
+        </template>
+        <div class="py-4">
+            <div class="mx-auto sm:px-6 lg:px-8 mt-4">
+                <TabView>
+                    <TabPanel header="Administrar Medicamentos">
+                        <div class="flex justify-end p-2">
+                            <PrimeButton @click="activateProducts" class="add-btn" icon="pi pi-angle-down" title="nuevo" />
                         </div>
-                        <div class="col-12">
-                            <PrimeButton
-                                label="Administrar Diagnósticos"
-                                class="p-button-secondary w-full"
-                                @click="activateDiagnostic" />
+                        <ListProducts v-if="product === true" />
+                    </TabPanel>
+                    <TabPanel header="Administrar Diagnósticos">
+                        <div class="flex justify-end p-2">
+                            <PrimeButton @click="activateDiagnostic" class="add-btn" icon="pi pi-angle-down" title="nuevo" />
                         </div>
-                        <div class="col-12">
-                            <PrimeButton
-                                label="Administrar Direcciones"
-                                class="p-button-secondary w-full"
-                                @click="activateAddress" />
+                        <ListDiagnostic v-if="diagnostic === true" />
+                    </TabPanel>
+                    <TabPanel header="Administrar Direcciones">
+                        <div class="flex justify-end p-2">
+                            <PrimeButton @click="activateAddress" class="add-btn" icon="pi pi-angle-down" title="nuevo" />
                         </div>
-                        <div class="col-12">
-                            <PrimeButton
-                                label="Administrar Presentaciones"
-                                class="p-button-secondary w-full"
-                                @click="activatePresentation" />
+                        <ListAddress  v-if="address  === true" />
+                    </TabPanel>
+                    <TabPanel header="Administrar Presentaciones">
+                        <div class="flex justify-end p-2">
+                            <PrimeButton @click="activatePresentation" class="add-btn" icon="pi pi-angle-down" title="nuevo" />
                         </div>
-                        <div class="col-12">
-                            <PrimeButton
-                                label="Administrar Pacientes"
-                                class="p-button-secondary w-full"
-                                @click="activatePatient" />
+                        <ListPresentation v-if="presentation === true" />
+                    </TabPanel>
+                    <TabPanel header="Administrar Pacientes">
+                        <div class="flex justify-end p-2">
+                            <PrimeButton @click="activatePatient" class="add-btn" icon="pi pi-angle-down" title="nuevo" />
                         </div>
-                    </div>
-                    <div class="grid">
-                        <div class="col p-6" v-if="product === true">
-                            <ListProducts />
-                        </div>
-                        <div class="col p-6" v-if="diagnostic === true">
-                            <ListDiagnostic />
-                        </div>
-                        <div class="col p-6" v-if="address  === true">
-                            <ListAddress />
-                        </div>
-                        <div class="col p-6" v-if="presentation === true">
-                            <ListPresentation />
-                        </div>
-                        <div class="col p-6" v-if="patient === true">
+                        <div v-if="patient === true">
                             <ListPatient v-if="$page.props.auth.user.role==='Admin'" />
                             <Message v-if="$page.props.auth.user.role==='Basic'" severity="warn" :closable="false">No cuenta con acceso a esta sección</Message>
                         </div>
-                    </div>
-                </div>
+                    </TabPanel>
+
+                </TabView>
             </div>
         </div>
 

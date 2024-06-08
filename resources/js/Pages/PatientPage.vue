@@ -40,9 +40,8 @@
                             <Column bodyStyle="justify-center" header="Acción"
                                     headerStyle="width: 14rem; justify-center">
                                 <template #body="slotProps">
-                                    <PrimeButton @click="goHistory(slotProps.data.personal_id)" icon="pi pi-chevron-circle-up" title="historico" />
                                     <PrimeButton @click="editPatient(slotProps.data.id)" icon="pi pi-pencil" class="btn_edit" title="editar" />
-                                    <PrimeButton @click="newLm(slotProps.data)" icon="pi pi-tags" class="btn_lms" title="Cargar Lm" />
+                                    <PrimeButton @click="newLm(slotProps.data)" icon="pi pi-tags" class="btn_lms" title="Crear Orden" />
                                 </template>
 
                             </Column>

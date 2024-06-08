@@ -49,6 +49,7 @@ Route::group(['auth', 'verified'], function () {
     Route::inertia('/reportspage', 'Reports/ReportPage')->name('reportspage');
     Route::inertia('/invoices', 'Invoices/ListInvoice')->name('invoices');
     Route::inertia('/values', 'ChargeValues/ListValues')->name('values');
+    Route::inertia('/admin', 'Dashboard/Admin')->name('admin');
 });
 
 //Api Rest Routes

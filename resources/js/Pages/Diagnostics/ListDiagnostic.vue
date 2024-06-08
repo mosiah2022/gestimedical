@@ -49,8 +49,8 @@ export default {
     },
     data() {
         return {
-            diagnostics: [],
-            loading1: null,
+            diagnostics: null,
+            loading1: true,
             filter: null,
             filters1: null,
             filters2: {
@@ -65,6 +65,7 @@ export default {
         async getDiagnostics() {
             await axios.get('api/patient_diagnostics').then((res) => {
                 this.diagnostics = res.data
+                this.loading1 = false;
             })
         },
         async destroyDiagnostic(id) {

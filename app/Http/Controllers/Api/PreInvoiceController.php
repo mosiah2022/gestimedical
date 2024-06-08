@@ -65,8 +65,9 @@ class PreInvoiceController extends Controller
     public function update_preinvoice(InvoiceRequest $request) {
         
         $invoice = new Invoice();
+        $request->merge(['company_id' => intval(session('company'))]);
         $invoice->invoice_number = $request->invoice_number;
-        $invoice->save();
+        $invoice->create($request->all());
 
         return $this->update_invoice($request->invoice_number);
     }

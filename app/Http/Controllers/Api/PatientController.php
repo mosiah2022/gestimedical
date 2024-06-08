@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Patients\PatientUpdate;
-use App\Http\Resources\Patient as PatientResource;
-use App\Http\Resources\PatientCollection;
 use App\Models\Patient;
-use App\Http\Requests\Patients\Patient as PatientRequest;
+use App\Models\Product;
 use App\Exports\PatientExport;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 
 /* Extern Libraries */
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Http\JsonResponse;
+use App\Http\Resources\PatientCollection;
+use App\Http\Requests\Patients\PatientUpdate;
+use App\Http\Resources\Patient as PatientResource;
+use App\Http\Requests\Patients\Patient as PatientRequest;
 
 
 class PatientController extends Controller
@@ -32,11 +31,10 @@ class PatientController extends Controller
      */
     public function index(): JsonResponse
     {
-
         return response()->json(
-            new PatientCollection(
-                $this->patient->orderBy(
-                    'first_name', 'asc')
+            new PatientCollection($this->patient
+                    ->where('company_id', intval(session('company')))
+                    ->orderBy('first_name', 'asc')
                     ->get()
             )
         );
@@ -50,6 +48,7 @@ class PatientController extends Controller
      */
     public function store(PatientRequest $request): JsonResponse
     {
+        $request->merge(['company_id' => intval(session('company'))]);
         $patient = $this->patient->create($request->all());
         return response()->json(new PatientResource($patient), 201);
     }

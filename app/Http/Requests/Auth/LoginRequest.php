@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Company;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,16 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'company_id' => ['required', 'exists:companies,id']
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'email.required' => 'Debe colocar su usuario',
+            'password.requred' => 'Debe colocar su contraseña',
+            'company_id.requred' => 'Debe seleccionar una empresa'
         ];
     }
 
@@ -52,6 +63,17 @@ class LoginRequest extends FormRequest
                 'email' => __('auth.failed'),
             ]);
         }
+
+        $user = Auth::user();
+        if (!$user->companies->contains($this->company_id)) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'company_id' => 'La empresa seleccionada no esta asociada con el usuario por favor valide con el administrador del sistema',
+            ]);
+        }
+
+        session(['company_id' => $this->company_id]);
 
         RateLimiter::clear($this->throttleKey());
     }

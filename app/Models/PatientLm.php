@@ -10,6 +10,7 @@ class PatientLm extends Model
     use HasFactory;
 
     protected $fillable=[
+        'company_id',
         'patient_id',
         'date_ini',
         'date_end',

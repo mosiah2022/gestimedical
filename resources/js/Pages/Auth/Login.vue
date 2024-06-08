@@ -18,6 +18,11 @@
             <BreezeInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required autocomplete="current-password" />
         </div>
 
+        <div class="mt-4">
+            <BreezeLabel for="company" value="Empresa" />
+            <Dropdown v-model="form.company_id" :options="companies" optionLabel="name" optionValue="id" placeholder="Selecciona una empresa" class="w-full" required />
+        </div>
+
         <div class="block mt-4">
             <label class="flex items-center">
                 <BreezeCheckbox name="remember" v-model:checked="form.remember" />
@@ -30,7 +35,7 @@
                 Olvidó su contraseña?
             </Link>
 
-            <BreezeButton class="ml-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+            <BreezeButton class="ml-4" :class="{ 'opacity-25': form.processing || !isFormValid }" :disabled="form.processing || !isFormValid">
                 Log in
             </BreezeButton>
         </div>
@@ -48,7 +53,6 @@ import { Head, Link } from '@inertiajs/inertia-vue3';
 
 export default {
     layout: BreezeGuestLayout,
-
     components: {
         BreezeButton,
         BreezeCheckbox,
@@ -58,7 +62,6 @@ export default {
         Head,
         Link,
     },
-
     props: {
         canResetPassword: Boolean,
         status: String,
@@ -69,11 +72,20 @@ export default {
             form: this.$inertia.form({
                 email: '',
                 password: '',
-                remember: false
-            })
+                remember: false,
+                company_id: ''
+            }),
+            companies: [
+                { name: 'Seguros Bolivar', id: '1' },
+                { name: 'Seguros Alfa', id: '2' },
+            ]
         }
     },
-
+    computed: {
+        isFormValid() {
+            return this.form.email && this.form.password && this.form.company_id;
+        }
+    },
     methods: {
         submit() {
             this.form.post(this.route('login'), {
