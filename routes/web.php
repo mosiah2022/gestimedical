@@ -82,6 +82,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'api'], function () {
     Route::get('getInvoiceActive', [PreInvoiceController::class,  'getInvoiceActive']);
     Route::get('getLmInfo/{id}', [PatientLmController::class, 'getLmInfo']);
     Route::get('getPatientsByDate/{dateini}/{dateend}',[PatientController::class, 'getPatientsByDate']);
+    Route::get('getMedicines', [ProductController::class, 'getMedicines']);
 
     //Exports Excel
     Route::get('export_patients/{iniDate}/{endDate}', [PatientController::class, 'export']);

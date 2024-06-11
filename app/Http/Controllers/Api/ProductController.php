@@ -53,6 +53,17 @@ class ProductController extends Controller
         ]);
     }
 
+    public function getMedicines(): JsonResponse
+    {
+        return response()->json(
+            new ProductCollection($this->product
+                    ->where('company_id', intval(session('company')))
+                    ->orderBy('name', 'asc')
+                    ->get()
+            )
+        );
+    }
+
     /**
      * Store a newly created resource in storage.
      *

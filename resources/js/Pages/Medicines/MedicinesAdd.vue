@@ -107,7 +107,7 @@ import axios from "axios";
                 Object.keys(this.formprod).map((val, index) => this.formprod[index] = '')
             },
             async getMedicines() {
-                await axios.get('api/products').then((res) => {
+                await axios.get('api/getMedicines').then((res) => {
                     this.medicines = res.data
                 })
             },

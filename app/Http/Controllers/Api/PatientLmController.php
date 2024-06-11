@@ -159,6 +159,7 @@ class PatientLmController extends Controller
                         ->join('patients', 'patient_lms.patient_id','=','patients.id')
                         ->select('patients.id as patient_id','patients.personal_id', 'patients.first_name', 'patients.last_name', 'patient_lms.lm_code','patient_lms.id')
                         ->where('patient_lms.lm_code',$id)
+                        ->where('patient_lms.company_id', intval(session('company')))
                         ->orWhere('patients.personal_id',$id)
                         ->orWhere('patients.first_name','like',$id.'%')
                         ->orWhere('patients.last_name','like',$id.'%')
@@ -171,8 +172,8 @@ class PatientLmController extends Controller
                           ->join('patient_lm_details', 'patient_lms.id','=','patient_lm_details.order_id')
                           ->select('patient_lms.lm_code','patient_lms.date_ini',DB::raw('count(*) as total_detail'))
                           ->where('status','pending')
+                          ->where('patient_lms.company_id', intval(session('company')))
                           ->whereBetween('patient_lms.date_ini', [$dateini,$dateend])
-                          ->where('company_id', intval(session('company')))
                           ->groupBy('patient_lms.lm_code','patient_lms.date_ini')
                           ->get();
 
@@ -198,7 +199,7 @@ class PatientLmController extends Controller
     }
 
     public function patientByLm($id) {
-        $patient_lm = PatientLm::where('lm_code',$id)->get();
+        $patient_lm = PatientLm::where('lm_code',$id)->where('company_id', intval(session('company')))->get();
 
         return response()->json(
             new PatientLmCollection($patient_lm)

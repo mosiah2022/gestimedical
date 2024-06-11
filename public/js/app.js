@@ -21834,7 +21834,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context.prev = _context.next) {
               case 0:
                 _context.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_3___default().get('api/products').then(function (res) {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default().get('api/getMedicines').then(function (res) {
                   _this2.medicines = res.data;
                 });
 
