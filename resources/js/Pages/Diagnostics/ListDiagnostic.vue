@@ -1,37 +1,32 @@
 <template>
-    <Card>
-        <template #title>
-            <h4>Diagnósticos</h4>
+    <DataTable :value="diagnostics" dataKey="id" :totalRecords="totalRecords"
+                stripedRows
+                lazy paginator
+                v-model:filters="filters1"
+                responsiveLayout="scroll"
+                :paginator="true"
+                :rows="perPage"
+                :loading="loading1"
+                @page="handlePageChange">
+        <template #header>
+            <div class="flex justify-content-center">
+                <span class="p-input-icon-left w-full">
+                    <i class="pi pi-search" />
+                    <InputText v-model="filters1.global.value" placeholder="Buscar" class="w-full" @input="handleFilterChange" />
+                </span>
+            </div>
         </template>
-        <template #content>
-            <DataTable :value="diagnostics" dataKey="id"
-                       v-model:filters="filters1"
-                       responsiveLayout="scroll"
-                       :paginator="true"
-                       :rows="10"
-                       :loading="loading1"
-                       :globalFilterFields="['global','description','patient.full_name','patient.personal_id']">
-                <template #header>
-                    <div class="flex justify-content-center">
-                        <span class="p-input-icon-left w-full">
-                            <i class="pi pi-search" />
-                            <InputText v-model="filters1['global'].value" placeholder="Buscar" class="w-full" />
-                        </span>
-                    </div>
-                </template>
-                <Column field="id" header="Id"/>
-                <Column field="description" header="Descripción" />
-                <Column field="patient.full_name" header="Paciente" />
-                <Column field="patient.personal_id" header="Cedula" />
-                <Column bodyStyle="text-align: center; overflow: visible" header="Acción"
-                        headerStyle="width: 14rem; text-align: center">
-                    <template #body="slotProps">
-                        <PrimeButton class="-right-2.5 del-btn" @click="destroyDiagnostic(slotProps.data.id)" icon="pi pi-trash" title="borrar" />
-                    </template>
-                </Column>
-            </DataTable>
-        </template>
-    </Card>
+        <Column field="id" header="Id"/>
+        <Column field="patient.full_name" header="Paciente" />
+        <Column field="description" header="Descripción" />
+        <Column field="patient.personal_id" header="Cedula" />
+        <Column bodyStyle="text-align: center; overflow: visible" header="Acción"
+                headerStyle="text-align: center">
+            <template #body="slotProps">
+                <PrimeButton class="-right-2.5 del-btn" @click="destroyDiagnostic(slotProps.data.id)" icon="pi pi-trash" title="borrar" />
+            </template>
+        </Column>
+    </DataTable>
 </template>
 
 <script>
@@ -40,6 +35,7 @@ import { Head } from '@inertiajs/inertia-vue3';
 import axios from 'axios';
 import Swal from 'sweetalert2'
 import {FilterMatchMode, FilterOperator} from "primevue/api";
+import debounce from 'lodash/debounce';
 
 export default {
     name: "ListDiagnostic",
@@ -49,25 +45,56 @@ export default {
     },
     data() {
         return {
-            diagnostics: null,
+            diagnostics: [],
+            totalRecords: 0,
+            currentPage: 1,
+            perPage: 10,
             loading1: true,
-            filter: null,
-            filters1: null,
-            filters2: {
-                'global': {value:null, matchMode: FilterMatchMode.CONTAINS},
-                'description': {value:null, matchMode: FilterMatchMode.STARTS_WITH},
-                'patient.full_name': {value:null, matchMode: FilterMatchMode.STARTS_WITH},
-                'patient.personal_id': {value:null, matchMode: FilterMatchMode.STARTS_WITH}
+            filters1: {
+                global: { value: ''}
             },
+            lazyParams: {
+                first: 0,
+                rows: 10,
+                sortField: null,
+                sortOrder: null,
+                filters: {}
+            }
         }
     },
     methods: {
-        async getDiagnostics() {
-            await axios.get('api/patient_diagnostics').then((res) => {
-                this.diagnostics = res.data
+        async loadLazyData() {
+            this.loading1 = false;
+            try {
+                const response = await axios.get('api/patient_diagnostics', {
+                    params: {
+                        page: this.currentPage,
+                        perPage: this.perPage,
+                        filters: this.filters1.global.value
+                    }
+                });
+                this.diagnostics = response.data.diagnostics;
+                this.totalRecords = response.data.totalRecords;
                 this.loading1 = false;
-            })
+            } catch (error) {
+                console.log('Error al traer los diagnosticos:', error);
+                this.loading1 = false;
+            }
         },
+        handlePageChange(event) {
+            this.lazyParams.first = event.first;
+            this.lazyParams.rows = event.rows;
+            this.currentPage = Math.floor(event.first / event.rows) + 1; // Usamos Math.floor para asegurarnos de que la página es correcta
+            this.loadLazyData();
+        },
+        handleFilterChange() {
+            this.currentPage = 1; // Reset page to 1 when a new filter is applied
+            this.lazyParams.first = 0;
+            this.debouncedLoadLazyData();
+        },
+        debouncedLoadLazyData: debounce(function() {
+            this.loadLazyData();
+        }, 500),
         async destroyDiagnostic(id) {
             Swal.fire({
                 title: 'Seguro de eliminar el diagnostico',
@@ -99,9 +126,9 @@ export default {
         this.initFilters1()
     },
     mounted() {
-        this.getDiagnostics();
+        this.loadLazyData();
         this.emitter.on('diagnostic_reload', () => {
-            this.getDiagnostics()
+            this.loadLazyData()
             this.$toast.add({
                 severity:'success', summary: 'SUCCESS!',
                 detail: `Se a borrado correctamente el registro`, life:3000
@@ -110,3 +137,21 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+    .del-btn{
+        color: red;
+        background-color: transparent;
+        border-width: 0;
+        border-bottom-width: 0px;
+        height: 24px;
+        width: 24px;
+    }
+    .edit_btn{
+        background-color: blue;
+    }
+    .add-btn{
+        margin-bottom: 20px;
+        border-radius: 50%;
+    }
+</style>

@@ -1,43 +1,36 @@
 <template>
-    <Card>
-        <template #header>
-            <div class="flex justify-end p-2">
-                <PrimeButton @click="createProduct" class="add-btn" icon="pi pi-plus" title="nuevo" />
-            </div>
-        </template>
-        <template #title>
-            <h4>Listado de productos</h4>
-        </template>
-        <template #content>
-            <DataTable v-model:filters="filters1" :value="products" :totalRecords="totalRecords" dataKey="id"
-                    lazy paginator
-                    responsiveLayout="scroll"
-                    :paginator="true"
-                    :rows="perPage"
-                    :loading="loading1"
-                    :globalFilterFields="['global', 'name']"
-                    @page="handlePageChange">
-                <template #header>
-                    <div class="flex justify-content-center">
-                        <span class="p-input-icon-left w-full">
-                            <i class="pi pi-search" />
-                            <InputText v-model="filters1.global.value" placeholder="Buscar" class="w-full" @input="handleFilterChange"/>
-                        </span>
-                    </div>
+
+        <div class="flex justify-end p-2">
+            <PrimeButton @click="createProduct" class="add-btn" icon="pi pi-plus" title="nuevo" />
+        </div>
+
+        <DataTable v-model:filters="filters1" :value="products" :totalRecords="totalRecords" dataKey="id"
+                stripedRows
+                lazy paginator
+                responsiveLayout="scroll"
+                :paginator="true"
+                :rows="perPage"
+                :loading="loading1"
+                :globalFilterFields="['global', 'name']"
+                @page="handlePageChange">
+            <template #header>
+                <div class="flex justify-content-center">
+                    <span class="p-input-icon-left w-full">
+                        <i class="pi pi-search" />
+                        <InputText v-model="filters1.global.value" placeholder="Buscar" class="w-full" @input="handleFilterChange" />
+                    </span>
+                </div>
+            </template>
+            <Column field="name" header="Nombre"></Column>
+            <Column bodyStyle="text-align: center; overflow: visible" header="Acción"
+                    headerStyle="text-align: center">
+                <template #body="slotProps">
+                    <PrimeButton class="edit_btn" @click="editProduct(slotProps.data.id)" icon="pi pi-pencil" title="editar" />
+                    <PrimeButton class="-right-2.5 del-btn" @click="destroyProduct(slotProps.data.id)" icon="pi pi-trash" title="borrar" />
                 </template>
-                <Column field="name" header="Nombre"></Column>
-                <Column bodyStyle="text-align: center; overflow: visible" header="Acción"
-                        headerStyle="width: 14rem; text-align: center">
-                    <template #body="slotProps">
-                        <PrimeButton class="edit_btn" @click="editProduct(slotProps.data.id)" icon="pi pi-pencil" title="editar" />
-                        <PrimeButton class="-right-2.5 del-btn" @click="destroyProduct(slotProps.data.id)" icon="pi pi-trash" title="borrar" />
-                    </template>
-                </Column>
-            </DataTable>
-        </template>
-        <template #footer>
-        </template>
-    </Card>
+            </Column>
+        </DataTable>
+        
     <Dialog :header="editId === null ? 'Crear Producto' : 'Editar Producto'" :style="{width: '50vw'}"
             v-model:visible="display">
         <ProductForm :editId="editId" />
@@ -55,6 +48,8 @@ export default {
   data() {
     return {
       products: [],
+      editId: null,
+      display: false,
       totalRecords: 0,
       currentPage: 1,
       perPage: 10,
@@ -70,6 +65,9 @@ export default {
         filters: {}
       }
     };
+  },
+  components: {
+    ProductForm
   },
   methods: {
         async loadLazyData() {
@@ -105,6 +103,7 @@ export default {
             this.loadLazyData();
         }, 500),
         async createProduct () {
+            console.log("Crea nuevo medicamento");
             this.editId = null
             this.display = true
         },
@@ -156,11 +155,18 @@ export default {
 
 <style scoped>
 .del-btn{
-    background-color: firebrick;
-    border-bottom-width: 0px;
+        color: red;
+        background-color: transparent;
+        border-width: 0;
+        height: 24px;
+        width: 24px;
 }
 .edit_btn{
-    background-color: blue;
+    color: blue;
+    background-color: transparent;
+    border-width: 0;
+    width: 24px;
+    height: 24px;
 }
 .add-btn{
     margin-bottom: 20px;

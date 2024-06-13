@@ -156,14 +156,17 @@ class PatientLmController extends Controller
     //Metodo para encontrar ordenes de pacientes o pacientes
     public function findOrders($id) {
         $find_orders = DB::table('patient_lms')
-                        ->join('patients', 'patient_lms.patient_id','=','patients.id')
-                        ->select('patients.id as patient_id','patients.personal_id', 'patients.first_name', 'patients.last_name', 'patient_lms.lm_code','patient_lms.id')
-                        ->where('patient_lms.lm_code',$id)
-                        ->where('patient_lms.company_id', intval(session('company')))
-                        ->orWhere('patients.personal_id',$id)
-                        ->orWhere('patients.first_name','like',$id.'%')
-                        ->orWhere('patients.last_name','like',$id.'%')
-                        ->get();
+        ->join('patients', 'patient_lms.patient_id', '=', 'patients.id')
+        ->select('patients.id as patient_id', 'patients.personal_id', 'patients.first_name', 'patients.last_name', 'patient_lms.lm_code', 'patient_lms.id')
+        ->where('patient_lms.company_id', intval(session('company')))
+        ->where(function($query) use ($id) {
+            $query->orWhere('patients.personal_id', $id)
+                  ->orWhere('patient_lms.lm_code', $id)
+                  ->orWhere('patients.first_name', 'like', $id . '%')
+                  ->orWhere('patients.last_name', 'like', $id . '%');
+        })
+        ->get();
+    
         return response()->json($find_orders);
     }
 

@@ -9,6 +9,7 @@ use App\Http\Resources\PatientDiagnostic as PatientDiagnosticResource;
 use App\Http\Resources\PatientDiagnosticCollection;
 use App\Models\PatientDiagnostic;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PatientDiagnosticController extends Controller
 {
@@ -23,16 +24,31 @@ class PatientDiagnosticController extends Controller
      *
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(
-            new PatientDiagnosticCollection(
-                $this->patient_diagnostic
-                ->where('company_id',  intval(session('company_id')))
-                ->orderBy('patient_id', 'desc')
-                ->get()
-            )
-        );
+        $companyId = intval(session('company'));
+        $perPage = $request->input('perPage', 10);
+        $currentPage = $request->input('page', 1);
+        $globalFilter = $request->input('filters', '');
+
+        $query = PatientDiagnostic::where('company_id', $companyId)
+        ->whereHas('patient', function($q) use ($globalFilter) {
+            if ($globalFilter) {
+                $q->where('first_name', 'like', '%' . $globalFilter . '%');
+            }
+        })
+        ->with('patient');
+
+        $totalRecords = $query->count();
+
+        $diagnostics = $query->orderBy('description', 'asc')->paginate($perPage, ['*'], 'page', $currentPage);
+        $totalPages = ceil($totalRecords / $perPage);
+
+        return response()->json([
+            'diagnostics' => new PatientDiagnosticCollection($diagnostics),
+            'totalRecords' => $totalRecords,
+            'totalPages' => $totalPages,
+        ]);
     }
 
     /**

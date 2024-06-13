@@ -10,7 +10,7 @@
                 <label>Presentacion <span class="pi pi-plus-circle justify-center cursor-pointer text-lime-600" @click="viewCreatePresentation" label="Nuevo"  /></label>
                 <Dropdown v-model="form.presentation_id" :options="presentations" optionLabel="name" optionValue="id"
                 placeholder="Seleccione una presentacion" class="w-100" />
-                <small class="text-red-500">{{ error_presentation }}</small>
+                <small class="text-red-500">{{ error_presentation_id }}</small>
             </div>
             <div class="p-field">
                 <label>Precio</label>
@@ -105,7 +105,7 @@ export default {
             const res = await axios.get(`/api/products/${this.$props.editId}`)
             this.form.name             = res.data.name
             this.form.presentation_id  = res.data.presentation_id
-            this.form.price            = res.data.price
+            this.form.price            = parseFloat(res.data.price)
         },
         viewCreatePresentation() {
             this.displayCreatePresentation = true;
