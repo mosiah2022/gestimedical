@@ -82,11 +82,13 @@ class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSiz
 
         $getCompany = Invoice::where('invoice_number', $this->invoice)->with(['company'])->first();
         $nameCompany = $getCompany->company->name;
+        $idCompany = $getCompany->company->id;
 
         return view('patients.orders', [
             'orders' => $query,
             'invoice_number' => $this->invoice,
-            'company' => $nameCompany
+            'company' => $nameCompany,
+            'companyId' => $idCompany
         ]);
     }
 }

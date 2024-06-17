@@ -9,13 +9,16 @@
     <table>
         <thead>
             <tr>
-                <th colspan="9">RELACIÓN DE PACIENTES {{ strtoupper($company) }}</th>
+                @php
+                    $colspan = ($companyId === 1) ? 9 : 8;
+                @endphp
+                <th colspan="{{ $colspan }}">RELACIÓN DE PACIENTES {{ strtoupper($company) }}</th>
             </tr>
             <tr>
-                <th colspan="9">GESTIMEDICAL SAS . NIT 900.644.246-3</th>
+                <th colspan="{{ $colspan }}">GESTIMEDICAL SAS . NIT 900.644.246-3</th>
             </tr>
             <tr>
-                <th colspan="9">FACTURA # GML - {{ $invoice_number }}</th>
+                <th colspan="{{ $colspan }}">FACTURA # GML - {{ $invoice_number }}</th>
             </tr>
         </thead>
         <tbody>
@@ -27,7 +30,9 @@
                             <td rowspan="{{ count($order) }}">{{ $patient->patient->first_name }} {{ $patient->patient->last_name }}</td>
                             <td rowspan="{{ count($order) }}">{{ $patient->patient->personal_id }} </td>
                             <td rowspan="{{ count($order) }}">{{ $patient->order->lm_code }} <br>{{ $patient->order->authorized_by }}</td>
-                            <td rowspan="{{ count($order) }}">{{ $patient->order->doctor_name }}</td>
+                            @if ($companyId === 1)
+                                <td rowspan="{{ count($order) }}">{{ $patient->order->doctor_name }}</td>
+                            @endif
                     @else
                         <tr>
                     @endif
@@ -49,7 +54,9 @@
                     <td style="background-color:#F0F0F0;"></td>
                     <td style="background-color:#F0F0F0;"></td>
                     <td style="background-color:#F0F0F0;"></td>
-                    <td style="background-color:#F0F0F0;"></td>
+                    @if ($companyId === 1)
+                        <td style="background-color:#F0F0F0;"></td>
+                    @endif
                     <td style="background-color:#F0F0F0;"></td>
                     <td style="background-color:#F0F0F0;"></td>
                     <td style="background-color:#F0F0F0;"></td>
@@ -74,7 +81,9 @@
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
-                        <td style="background-color:#F0F0F0;"></td>
+                        @if ($companyId === 1)
+                            <td style="background-color:#F0F0F0;"></td>
+                        @endif
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"><strong>COPAGO {{$patient->order->discount_percent}} % POR PARTE DEL USUARIO:</strong></td>
                         <td style="background-color:#F0F0F0;"></td>
@@ -95,7 +104,9 @@
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
-                        <td style="background-color:#F0F0F0;"></td>
+                        @if ($companyId === 1)
+                            <td style="background-color:#F0F0F0;"></td>
+                        @endif
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"><strong>VALOR TOTAL FORMULA:</strong></td>
                         <td style="background-color:#F0F0F0;"></td>
@@ -121,7 +132,9 @@
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
+            @if ($companyId === 1)
+                <td></td>
+            @endif
             <td></td>
             <td><strong>VALOR TOTAL FACTURA:</strong></td>
             <td data-format="$#,##0_-"><strong>

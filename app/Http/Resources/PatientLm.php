@@ -18,6 +18,7 @@ class PatientLm extends JsonResource
     {
         return [
             'id'               => $this->id,
+            'company_id'       => $this->company_id,
             'patient_id'       => $this->patient_id,
             'date_ini'         => $this->date_ini,
             'authorized_by'    => $this->authorized_by,
