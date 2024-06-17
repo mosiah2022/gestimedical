@@ -122,6 +122,7 @@
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
             <td><strong>VALOR TOTAL FACTURA:</strong></td>
             <td data-format="$#,##0_-"><strong>
                 {{ $orders->map(function($order) {

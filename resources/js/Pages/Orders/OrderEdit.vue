@@ -80,7 +80,7 @@
             <Slider v-model="form.discount_percent" :min="0" :max="100" />
         </div>
         
-        <FileUploadFile :patient_id="$props.patient_id" />
+        <FileUploadFile :patient_id="$props.patient_id"  />
 
         <div class="field">
             <PrimeButton icon="pi pi-save" label="Guardar" class="sm:-bottom-1.5" @click="submitLm($props.editId)" />
@@ -111,6 +111,8 @@ import CreateDiagnostic from '../Patients/CreateDiagnostic.vue'
 import MedicinesAdd from '../Medicines/MedicinesAdd.vue'
 import FileUploadFile from '../Uploads/FileUploadFile.vue'
 
+axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
 export default {
     name: "OrderEdit",
     components: {
@@ -135,7 +137,7 @@ export default {
                 lm_code: null,
                 authorized_by: null,
                 observation: null,
-                discount_percent: null
+                discount_percent: null,
             },
             phones: [],
             diagnostics: [],
@@ -208,6 +210,10 @@ export default {
         },
         async setDiagnostic(){
             this.diagnostic_idold = this.form.diagnostic_id;
+        },
+
+        onAdvancedUpload() {
+            this.$toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
         },
 
         async submitLm(order) {

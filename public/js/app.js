@@ -22063,6 +22063,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
+(axios__WEBPACK_IMPORTED_MODULE_1___default().defaults.headers.common["X-CSRF-TOKEN"]) = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "OrderEdit",
   components: {
@@ -22274,6 +22275,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           }
         }, _callee7);
       }))();
+    },
+    onAdvancedUpload: function onAdvancedUpload() {
+      this.$toast.add({
+        severity: 'info',
+        summary: 'Success',
+        detail: 'File Uploaded',
+        life: 3000
+      });
     },
     submitLm: function submitLm(order) {
       var _this8 = this;
@@ -23896,11 +23905,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                console.log("Crea nuevo medicamento");
                 _this2.editId = null;
                 _this2.display = true;
 
-              case 3:
+              case 2:
               case "end":
                 return _context2.stop();
             }
@@ -29739,10 +29747,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var primevue_checkbox__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! primevue/checkbox */ "./node_modules/primevue/checkbox/checkbox.esm.js");
 /* harmony import */ var primevue_slider__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! primevue/slider */ "./node_modules/primevue/slider/slider.esm.js");
 /* harmony import */ var primevue_progressspinner__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! primevue/progressspinner */ "./node_modules/primevue/progressspinner/progressspinner.esm.js");
-/* harmony import */ var primevue_fileupload__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! primevue/fileupload */ "./node_modules/primevue/fileupload/fileupload.esm.js");
-/* harmony import */ var primevue_message__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! primevue/message */ "./node_modules/primevue/message/message.esm.js");
-/* harmony import */ var primevue_tabview__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! primevue/tabview */ "./node_modules/primevue/tabview/tabview.esm.js");
-/* harmony import */ var primevue_tabpanel__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! primevue/tabpanel */ "./node_modules/primevue/tabpanel/tabpanel.esm.js");
+/* harmony import */ var primevue_message__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! primevue/message */ "./node_modules/primevue/message/message.esm.js");
+/* harmony import */ var primevue_tabview__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! primevue/tabview */ "./node_modules/primevue/tabview/tabview.esm.js");
+/* harmony import */ var primevue_tabpanel__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! primevue/tabpanel */ "./node_modules/primevue/tabpanel/tabpanel.esm.js");
+/* harmony import */ var primevue_fileupload__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! primevue/fileupload */ "./node_modules/primevue/fileupload/fileupload.esm.js");
 var _window$document$getE;
 
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
@@ -29799,7 +29807,7 @@ var emitter = (0,mitt__WEBPACK_IMPORTED_MODULE_4__["default"])();
         return (0,vue__WEBPACK_IMPORTED_MODULE_0__.h)(app, props);
       }
     });
-    vueApp.component('AutoComplete', primevue_autocomplete__WEBPACK_IMPORTED_MODULE_10__["default"]).component('DataTable', primevue_datatable__WEBPACK_IMPORTED_MODULE_11__["default"]).component('InputText', primevue_inputtext__WEBPACK_IMPORTED_MODULE_12__["default"]).component('InputNumber', primevue_inputnumber__WEBPACK_IMPORTED_MODULE_13__["default"]).component('Column', primevue_column__WEBPACK_IMPORTED_MODULE_14__["default"]).component('Dialog', primevue_dialog__WEBPACK_IMPORTED_MODULE_15__["default"]).component('Toast', primevue_toast__WEBPACK_IMPORTED_MODULE_17__["default"]).component('Card', primevue_card__WEBPACK_IMPORTED_MODULE_18__["default"]).component('TextArea', primevue_textarea__WEBPACK_IMPORTED_MODULE_19__["default"]).component('PrimeButton', primevue_button__WEBPACK_IMPORTED_MODULE_20__["default"]).component('Dropdown', primevue_dropdown__WEBPACK_IMPORTED_MODULE_21__["default"]).component('Calendar', primevue_calendar__WEBPACK_IMPORTED_MODULE_22__["default"]).component('RadioButton', primevue_radiobutton__WEBPACK_IMPORTED_MODULE_23__["default"]).component('InputMask', primevue_inputmask__WEBPACK_IMPORTED_MODULE_24__["default"]).component('Checkbox', primevue_checkbox__WEBPACK_IMPORTED_MODULE_25__["default"]).component('Slider', primevue_slider__WEBPACK_IMPORTED_MODULE_26__["default"]).component('ProgressSpinner', primevue_progressspinner__WEBPACK_IMPORTED_MODULE_27__["default"]).component('FileUpload', primevue_fileupload__WEBPACK_IMPORTED_MODULE_28__["default"]).component('Message', primevue_message__WEBPACK_IMPORTED_MODULE_29__["default"]).component('TabView', primevue_tabview__WEBPACK_IMPORTED_MODULE_30__["default"]).component('TabPanel', primevue_tabpanel__WEBPACK_IMPORTED_MODULE_31__["default"]).use(plugin).use(primevue_config__WEBPACK_IMPORTED_MODULE_3__["default"]).use(primevue_toastservice__WEBPACK_IMPORTED_MODULE_16__["default"]).use((vue_sweetalert2__WEBPACK_IMPORTED_MODULE_5___default())).mixin({
+    vueApp.component('AutoComplete', primevue_autocomplete__WEBPACK_IMPORTED_MODULE_10__["default"]).component('DataTable', primevue_datatable__WEBPACK_IMPORTED_MODULE_11__["default"]).component('InputText', primevue_inputtext__WEBPACK_IMPORTED_MODULE_12__["default"]).component('InputNumber', primevue_inputnumber__WEBPACK_IMPORTED_MODULE_13__["default"]).component('Column', primevue_column__WEBPACK_IMPORTED_MODULE_14__["default"]).component('Dialog', primevue_dialog__WEBPACK_IMPORTED_MODULE_15__["default"]).component('Toast', primevue_toast__WEBPACK_IMPORTED_MODULE_17__["default"]).component('Card', primevue_card__WEBPACK_IMPORTED_MODULE_18__["default"]).component('TextArea', primevue_textarea__WEBPACK_IMPORTED_MODULE_19__["default"]).component('PrimeButton', primevue_button__WEBPACK_IMPORTED_MODULE_20__["default"]).component('Dropdown', primevue_dropdown__WEBPACK_IMPORTED_MODULE_21__["default"]).component('Calendar', primevue_calendar__WEBPACK_IMPORTED_MODULE_22__["default"]).component('RadioButton', primevue_radiobutton__WEBPACK_IMPORTED_MODULE_23__["default"]).component('InputMask', primevue_inputmask__WEBPACK_IMPORTED_MODULE_24__["default"]).component('Checkbox', primevue_checkbox__WEBPACK_IMPORTED_MODULE_25__["default"]).component('Slider', primevue_slider__WEBPACK_IMPORTED_MODULE_26__["default"]).component('ProgressSpinner', primevue_progressspinner__WEBPACK_IMPORTED_MODULE_27__["default"]).component('FileUpload', primevue_fileupload__WEBPACK_IMPORTED_MODULE_31__["default"]).component('Message', primevue_message__WEBPACK_IMPORTED_MODULE_28__["default"]).component('TabView', primevue_tabview__WEBPACK_IMPORTED_MODULE_29__["default"]).component('TabPanel', primevue_tabpanel__WEBPACK_IMPORTED_MODULE_30__["default"]).use(plugin).use(primevue_config__WEBPACK_IMPORTED_MODULE_3__["default"]).use(primevue_toastservice__WEBPACK_IMPORTED_MODULE_16__["default"]).use((vue_sweetalert2__WEBPACK_IMPORTED_MODULE_5___default())).mixin({
       methods: {
         route: route
       }

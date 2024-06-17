@@ -103,7 +103,6 @@ export default {
             this.loadLazyData();
         }, 500),
         async createProduct () {
-            console.log("Crea nuevo medicamento");
             this.editId = null
             this.display = true
         },
