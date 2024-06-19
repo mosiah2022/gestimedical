@@ -12,6 +12,7 @@
                 @php
                     $colspan = ($companyId === 1) ? 9 : 8;
                 @endphp
+                
                 <th colspan="{{ $colspan }}">RELACIÓN DE PACIENTES {{ strtoupper($company) }}</th>
             </tr>
             <tr>

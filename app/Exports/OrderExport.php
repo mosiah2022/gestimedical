@@ -20,6 +20,7 @@ use \Maatwebsite\Excel\Sheet;
 class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSize, WithStyles, WithCustomValueBinder
 {
     public $invoice;
+    public $idCompany;
 
     public function bindValue(Cell $cell, $value)
     {
@@ -31,6 +32,28 @@ class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSiz
 
         // else return default behavior
         return parent::bindValue($cell, $value);
+    }
+
+    public function __construct(int $invoice){
+        $this->invoice = $invoice;
+    }
+
+    public function view(): View
+    {
+        $query = PatientLmDetail::with(['product', 'patient','product.presentation'])->whereHas('order', function($query){
+            return $query->where('invoice_number',$this->invoice);
+        })->get()->groupBy('order.id');
+
+        $getCompany = Invoice::where('invoice_number', $this->invoice)->with(['company'])->first();
+        $nameCompany = $getCompany->company->name;
+        $this->idCompany = $getCompany->company->id;
+
+        return view('patients.orders', [
+            'orders' => $query,
+            'invoice_number' => $this->invoice,
+            'company' => $nameCompany,
+            'companyId' => $this->idCompany
+        ]);
     }
 
     public function styles(Worksheet $sheet)
@@ -64,31 +87,16 @@ class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSiz
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
         ];
-        $sheet->getStyle('A2:I2')->applyFromArray($styleArray);
-        $sheet->getStyle('A3:I3')->applyFromArray($styleArray);
-        $sheet->getStyle('A4:I4')->applyFromArray($styleArray);
+        if ($this->idCompany === 1) {
+            $sheet->getStyle('A2:I2')->applyFromArray($styleArray);
+            $sheet->getStyle('A3:I3')->applyFromArray($styleArray);
+            $sheet->getStyle('A4:I4')->applyFromArray($styleArray);
+        } else {
+            $sheet->getStyle('A2:H2')->applyFromArray($styleArray);
+            $sheet->getStyle('A3:H3')->applyFromArray($styleArray);
+            $sheet->getStyle('A4:H4')->applyFromArray($styleArray);
+        }
+
         $sheet->getStyle('C')->applyFromArray($styleAlign);
-    }
-
-    public function __construct(int $invoice){
-        $this->invoice = $invoice;
-    }
-
-    public function view(): View
-    {
-        $query = PatientLmDetail::with(['product', 'patient','product.presentation'])->whereHas('order', function($query){
-            return $query->where('invoice_number',$this->invoice);
-        })->get()->groupBy('order.id');
-
-        $getCompany = Invoice::where('invoice_number', $this->invoice)->with(['company'])->first();
-        $nameCompany = $getCompany->company->name;
-        $idCompany = $getCompany->company->id;
-
-        return view('patients.orders', [
-            'orders' => $query,
-            'invoice_number' => $this->invoice,
-            'company' => $nameCompany,
-            'companyId' => $idCompany
-        ]);
     }
 }
