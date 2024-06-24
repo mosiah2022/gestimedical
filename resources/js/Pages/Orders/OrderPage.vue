@@ -11,13 +11,9 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
-                        <div class="p-field">
-                            <label>Buscar</label>
+                        <div class="p-field flex items-center space-x-2">
                             <InputText v-model="form.search" class="w-full" />
-                            <small class="text-red-500"></small>
-                        </div>
-                        <div class="p-field">
-                            <PrimeButton icon="pi pi-search" label="Buscar" class="sm:-bottom-1.5" @click="search" />
+                            <PrimeButton icon="pi pi-search" label="Buscar" class="p-button p-button-primary" @click="search" />
                         </div>
                         <DataTable :filters="filter" :value="orders" dataKey="id" responsiveLayout="scroll" :paginate="true" :rows="20" class="mt-5">
                             <Column field="first_name" header="Nombre"></Column>
@@ -36,8 +32,12 @@
                 </div>
             </div>
 
-            <Dialog :header="'Editando orden'" :style="{width: '50vw'}"
-                    v-model:visible="displayOrderEdit" :maximizable="true" >
+            <Dialog 
+                :header="'Editando orden'" 
+                :style="{width: '50vw'}"
+                v-model:visible="displayOrderEdit" 
+                :maximizable="true"
+            >
                 <OrderEdit :editId="editId" :patient_id="patientId" />
             </Dialog>
 

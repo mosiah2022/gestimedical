@@ -1,22 +1,23 @@
 <?php
 
-use App\Http\Controllers\Api\BrandController;
-use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\Api\PatientController;
-use App\Http\Controllers\Api\PatientLmController;
+use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
 use App\Http\Controllers\Api\CityController;
+use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\DoctorController;
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\PatientController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\PatientLmController;
+use App\Http\Controllers\Api\FileUploadController;
+use App\Http\Controllers\Api\PreInvoiceController;
+
+use App\Http\Controllers\Api\PresentationController;
 use App\Http\Controllers\Api\PatientAddressController;
 use App\Http\Controllers\Api\PatientLmDetailController;
 use App\Http\Controllers\Api\PatientDiagnosticController;
-use App\Http\Controllers\Api\PreInvoiceController;
-use App\Http\Controllers\Api\PresentationController;
-use App\Http\Controllers\Api\InvoiceController;
-use App\Http\Controllers\Api\FileUploadController;
-
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +84,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'api'], function () {
     Route::get('getLmInfo/{id}', [PatientLmController::class, 'getLmInfo']);
     Route::get('getPatientsByDate/{dateini}/{dateend}',[PatientController::class, 'getPatientsByDate']);
     Route::get('getMedicines', [ProductController::class, 'getMedicines']);
+    Route::get('list_files/{patient_id}', [FileUploadController::class, 'listFiles']);
 
     //Exports Excel
     Route::get('export_patients/{iniDate}/{endDate}', [PatientController::class, 'export']);
@@ -99,6 +101,9 @@ Route::group(['middleware' => 'auth', 'prefix' => 'api'], function () {
     //Uploads Methods
     Route::get('upload_file', function() { return view('upload'); });
     Route::post('store_file', [FileUploadController::class, 'fileStore']);
+
+    //Delete post on cloud
+    Route::post('delete_file', [FileUploadController::class, 'delete']);
 });
 
 require __DIR__.'/auth.php';
