@@ -95,6 +95,6 @@ class PatientLmDetailController extends Controller
     }
 
     public function export($dateini, $dateend) {
-        return Excel::download(new ValueExport($dateini, $dateend), 'chargue_values.xlsx');
+        return Excel::download(new ValueExport($dateini, $dateend, intval(session('company'))), 'chargue_values.xlsx');
     }
 }
