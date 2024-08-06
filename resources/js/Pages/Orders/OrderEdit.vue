@@ -53,7 +53,7 @@
         <div class="field col">
             <label class="font-bold text-teal-500">Coloque nombre y apellido del Doctor</label>
             <InputText v-model="form.doctor_name" class="inputfield w-full"  />
-        </div>        
+        </div>
         <MedicinesAdd :order_id="$props.editId" :patient_id="$props.patient_id" />
 
         <div class="formgrid grid mt-4">
@@ -72,12 +72,12 @@
             <InputText v-model="form.observation" class="inputfield w-full" />
         </div>
         <div class="field-checkbox my-4">
-            <Checkbox id="copago" name="copago" value="0" v-model="copago_check" :binary="true" />
-            <label>Indique si tiene copago</label>
+            <Checkbox inputId="copago" name="copago" value="0" v-model="copago_check" :binary="true" />
+            <label for="copago">Indique si tiene copago</label>
         </div>
         <div class="field col" v-if="copago_check === true">
-            <h5>Seleccione el Copago  {{ form.discount_percent }} %</h5>
-            <Slider v-model="form.discount_percent" :min="0" :max="100" />
+            <h5>Indique el Copago</h5>
+            <InputText v-model="form.discount_percent" class="w-full"/>
         </div>
 
         <FileUpload
@@ -151,6 +151,7 @@ import DataTable from 'primevue/datatable'
 import { values } from 'lodash'
 import Column from 'primevue/column'
 import Swal from 'sweetalert2'
+import { min } from 'lodash'
 
 axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -222,7 +223,7 @@ export default {
                 },
                 accept: () => {
                     axios.post('/api/delete_file', { id:id, name: fileName, patient_id: this.patient_id }).then(response => {
-                        this.uploadedFiles = this.uploadedFiles.filter(file => file.id !== id); 
+                        this.uploadedFiles = this.uploadedFiles.filter(file => file.id !== id);
                     })
                     this.$toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Archivo eliminado', life: 3000 });
                 },
@@ -246,12 +247,12 @@ export default {
                     formData.append('files[]', this.files[i]);
                 }
                 formData.append('patient_id', this.$props.patient_id);
-             
+
                 axios.post('/api/store_file', formData, config).then(function (response){
                     currentObj.success = response.data.success;
                     currentObj.filename = "";
                     console.log("Se a guardado correctamente el archivo");
-                    return this.emitter.emit('photo_reload')               
+                    return this.emitter.emit('photo_reload')
                 })
                 .catch(function (error){
                     currentObj.output = error;
@@ -344,7 +345,7 @@ export default {
         this.getOrder();
         this.getProducts();
         this.getListFiles();
-        
+
         this.emitter.on('photo_reload', ()=> {
             this.$toast.add({
                 severity:'success', summary: 'SUCCESS',

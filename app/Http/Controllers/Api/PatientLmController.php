@@ -90,7 +90,9 @@ class PatientLmController extends Controller
         $request->merge(['date_ini' => Carbon::parse($request->date_ini)->toDateString()]);
         $request->merge(['date_end' => Carbon::parse($request->date_end)->toDateString()]);
 
-        $patient_lm->update($request->all());
+        $filteredRequest = $request->except('orders');
+
+        $patient_lm->update($filteredRequest);
         return response()->json(new PatientLmResource($patient_lm));
     }
 
@@ -166,7 +168,7 @@ class PatientLmController extends Controller
                   ->orWhere('patients.last_name', 'like', $id . '%');
         })
         ->get();
-    
+
         return response()->json($find_orders);
     }
 

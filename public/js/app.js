@@ -22073,6 +22073,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
+
 (axios__WEBPACK_IMPORTED_MODULE_1___default().defaults.headers.common["X-CSRF-TOKEN"]) = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "OrderEdit",
@@ -22602,6 +22603,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     var _this4 = this;
 
     this.emitter.on('patientLm_reload', function () {
+      _this4.displayOrderEdit = false;
+
       _this4.search();
 
       _this4.$toast.add({
@@ -27825,7 +27828,9 @@ var _hoisted_29 = {
   "class": "field-checkbox my-4"
 };
 
-var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Indique si tiene copago", -1
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  "for": "copago"
+}, "Indique si tiene copago", -1
 /* HOISTED */
 );
 
@@ -27834,27 +27839,31 @@ var _hoisted_31 = {
   "class": "field col"
 };
 
-var _hoisted_32 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, "Arrastre y suelte los archivos que quiera adjuntar a la orden", -1
+var _hoisted_32 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, "Indique el Copago", -1
 /* HOISTED */
 );
 
-var _hoisted_33 = {
+var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, "Arrastre y suelte los archivos que quiera adjuntar a la orden", -1
+/* HOISTED */
+);
+
+var _hoisted_34 = {
   key: 2,
   "class": "font-bold text-lg text-blue-800 mt-4"
 };
 
-var _hoisted_34 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "capitalize"
 }, "Nombre", -1
 /* HOISTED */
 );
 
-var _hoisted_35 = {
+var _hoisted_36 = {
   "class": "lowercase"
 };
-var _hoisted_36 = ["href"];
+var _hoisted_37 = ["href"];
 
-var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", {
+var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", {
   "class": "pi pi-eye mr-2 text-blue-600 font-bold",
   style: {
     "font-size": "1rem"
@@ -27863,10 +27872,10 @@ var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_38 = [_hoisted_37];
-var _hoisted_39 = ["onClick"];
+var _hoisted_39 = [_hoisted_38];
+var _hoisted_40 = ["onClick"];
 
-var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", {
+var _hoisted_41 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", {
   "class": "pi pi-trash mr-2 text-red-600 font-bold",
   style: {
     "font-size": "1rem"
@@ -27875,8 +27884,8 @@ var _hoisted_40 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_41 = [_hoisted_40];
-var _hoisted_42 = {
+var _hoisted_42 = [_hoisted_41];
+var _hoisted_43 = {
   "class": "field flex justify-end mt-4"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -27891,8 +27900,6 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_MedicinesAdd = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("MedicinesAdd");
 
   var _component_Checkbox = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Checkbox");
-
-  var _component_Slider = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Slider");
 
   var _component_FileUpload = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("FileUpload");
 
@@ -28039,7 +28046,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, null, 8
   /* PROPS */
   , ["modelValue"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Checkbox, {
-    id: "copago",
+    inputId: "copago",
     name: "copago",
     value: "0",
     modelValue: $data.copago_check,
@@ -28049,15 +28056,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     binary: true
   }, null, 8
   /* PROPS */
-  , ["modelValue"]), _hoisted_30]), $data.copago_check === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_31, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, "Seleccione el Copago " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.form.discount_percent) + " %", 1
-  /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Slider, {
+  , ["modelValue"]), _hoisted_30]), $data.copago_check === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_31, [_hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
     modelValue: $data.form.discount_percent,
     "onUpdate:modelValue": _cache[14] || (_cache[14] = function ($event) {
       return $data.form.discount_percent = $event;
     }),
-    min: 0,
-    max: 100
+    "class": "w-full"
   }, null, 8
   /* PROPS */
   , ["modelValue"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_FileUpload, {
@@ -28073,12 +28077,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     cancelLabel: "Cancelar"
   }, {
     empty: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [_hoisted_32];
+      return [_hoisted_33];
     }),
     _: 1
     /* STABLE */
 
-  }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ConfirmPopup), $data.uploadedFiles ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h2", _hoisted_33, "Archivos adjuntos a la orden")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DataTable, {
+  }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ConfirmPopup), $data.uploadedFiles ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h2", _hoisted_34, "Archivos adjuntos a la orden")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DataTable, {
     value: $data.uploadedFiles,
     tableStyle: "min-width: 50rem",
     dataKey: "id"
@@ -28089,10 +28093,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "class": "lowercase"
       }, {
         header: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-          return [_hoisted_34];
+          return [_hoisted_35];
         }),
         body: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (slotProps) {
-          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(slotProps.data.name), 1
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(slotProps.data.name), 1
           /* TEXT */
           )];
         }),
@@ -28109,17 +28113,17 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             href: slotProps.data.uri,
             target: "_blank",
             title: "Detalle"
-          }, _hoisted_38, 8
+          }, _hoisted_39, 8
           /* PROPS */
-          , _hoisted_36), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+          , _hoisted_37), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
             href: "#",
             title: "Eliminar",
             onClick: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
               return $options.removeFile($event, slotProps.data.id, slotProps.data.name);
             }, ["prevent"])
-          }, _hoisted_41, 8
+          }, _hoisted_42, 8
           /* PROPS */
-          , _hoisted_39)];
+          , _hoisted_40)];
         }),
         _: 1
         /* STABLE */
@@ -28131,7 +28135,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   }, 8
   /* PROPS */
-  , ["value"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_42, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
+  , ["value"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
     icon: "pi pi-save",
     label: "Guardar",
     "class": "sm:-bottom-1.5",
@@ -30128,6 +30132,7 @@ window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting

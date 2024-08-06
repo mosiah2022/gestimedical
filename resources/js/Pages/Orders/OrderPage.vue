@@ -32,10 +32,10 @@
                 </div>
             </div>
 
-            <Dialog 
-                :header="'Editando orden'" 
+            <Dialog
+                :header="'Editando orden'"
                 :style="{width: '50vw'}"
-                v-model:visible="displayOrderEdit" 
+                v-model:visible="displayOrderEdit"
                 :maximizable="true"
             >
                 <OrderEdit :editId="editId" :patient_id="patientId" />
@@ -105,6 +105,7 @@ export default {
     },
     mounted() {
         this.emitter.on('patientLm_reload', ()=> {
+            this.displayOrderEdit = false
             this.search()
             this.$toast.add({
                 severity:'success', summary: 'SUCCESS',
