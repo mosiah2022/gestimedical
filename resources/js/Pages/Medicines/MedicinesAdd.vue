@@ -11,6 +11,7 @@
                     :filter="true"
                     filterPlaceholder="Buscar medicamento"
                     :showClear="true"
+                    @change="handleChange"
                 />
             </div>
              <div class="field col">
@@ -25,16 +26,16 @@
 
         <div>
             <span class="justify-center" v-if="animation_wait === true">Espere un momento por favor <ProgressSpinner /></span>
-            <DataTable 
+            <DataTable
                 stripedRows
-                :filters="filter" 
-                :value="details" 
-                dataKey="id" 
-                responsiveLayout="scroll" 
+                :filters="filter"
+                :value="details"
+                dataKey="id"
+                responsiveLayout="scroll"
                 editMode="row"
-                v-model:editingRows="editingRows" 
-                @row-edit-save="onRowEditSave" 
-                :paginate="true" :rows="20" 
+                v-model:editingRows="editingRows"
+                @row-edit-save="onRowEditSave"
+                :paginate="true" :rows="20"
                 class="editable-cells-table"
             >
                 <Column field="products.name" header="Medicamento">
@@ -109,6 +110,7 @@ import axios from "axios";
                     order_id: null,
                     patient_id: null,
                     prescription: null,
+                    price_detail: null,
                 },
                 displayCreateProduct: false,
                 editId: null,
@@ -180,6 +182,12 @@ import axios from "axios";
                 axios.delete(`/api/patient_lm_details/${id}`).then(() => {
                     this.animation_wait = false
                     return this.emitter.emit('patient_lm_destroy_reload')
+                })
+            },
+            async handleChange(event) {
+                let product_id = event.value;
+                axios.get(`/api/products/${product_id}`).then((res) => {
+                    this.formprod.price_detail = res.data.price
                 })
             }
         },

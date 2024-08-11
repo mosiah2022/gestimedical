@@ -50,7 +50,7 @@ class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSiz
             $orderTotal = array_reduce(
                 $order->toArray(),
                 function ($sum, $patient) {
-                    return $sum + ((float) $patient['product']['price'] * (float) $patient['prescription']);
+                    return $sum + ((float) $patient['price_detail'] * (float) $patient['prescription']);
                 },
                 0
             );

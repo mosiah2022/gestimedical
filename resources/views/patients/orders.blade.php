@@ -46,8 +46,8 @@
                                 {{ $patient->product->presentation->name }}
                             @endif
                         </td>
-                        <td data-format="#,##0_-">{{ $patient->product->price,0 }}</td>
-                        <td data-format="#,##0_-">{{ $patient->product->price*$patient->prescription,0 }}</td>
+                        <td data-format="#,##0_-">{{ $patient->price_detail,0 }}</td>
+                        <td data-format="#,##0_-">{{ $patient->price_detail*$patient->prescription,0 }}</td>
                     </tr>
                     {{ $patientPerOrder[] = $patient->patient->patient_id }}
                 @endforeach
@@ -68,7 +68,7 @@
                             array_reduce(
                                 $order->toArray(),
                                 function ($sum, $patient) {
-                                    return (float) ($sum += (float) ($patient['product']['price']*$patient['prescription']));
+                                    return (float) ($sum += (float) ($patient['price_detail']*$patient['prescription']));
                                 },
                             0,)
                         }}
@@ -91,7 +91,7 @@
                         {{ array_reduce(
                                 $order->toArray(),
                                 function ($sum, $patient) {
-                                    return $sum + (float) ($patient['product']['price'] * $patient['prescription']);
+                                    return $sum + (float) ($patient['price_detail'] * $patient['prescription']);
                                 },
                                 0,
                             ) - $patient->order->discount_percent }}
@@ -112,7 +112,7 @@
                             {{ array_reduce(
                                 $order->toArray(),
                                 function ($sum, $patient) {
-                                    return $sum + (float) ($patient['product']['price'] * $patient['prescription']);
+                                    return $sum + (float) ($patient['price_detail'] * $patient['prescription']);
                                 },
                                 0,
                             ) - $patient->order->discount_percent }}

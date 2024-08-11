@@ -15,7 +15,8 @@ class PatientLmDetail extends Model
         "product_id",
         "order_id",
         "patient_id",
-        "prescription"
+        "prescription",
+        "price_detail"
     ];
 
 

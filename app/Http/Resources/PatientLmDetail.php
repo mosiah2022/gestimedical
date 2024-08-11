@@ -18,6 +18,7 @@ class PatientLmDetail extends JsonResource
             'id'           => $this->id,
             'product_id'   => $this->product_id,
             'prescription' => $this->prescription,
+            'price_detail' => $this->price_detail,
             'products'     => Product::make($this->product)
         ];
     }
