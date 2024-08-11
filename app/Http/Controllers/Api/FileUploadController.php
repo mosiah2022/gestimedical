@@ -3,82 +3,75 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\UploadFileJob;
 use App\Models\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class FileUploadController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
+    public function listFiles($patient_id) {
+        $photos = Photo::where('patient_id', $patient_id)->get();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $files = $photos->map(function($photo) {
+            return [
+                'id' => $photo->id,
+                'name' => $photo->name,
+                'uri' => Storage::disk('gcs')->temporaryUrl($photo->uri, now()->addMinutes(15))
+            ];
+        });
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Photo  $photo
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Photo $photo)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Photo  $photo
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Photo $photo)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Photo  $photo
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Photo $photo)
-    {
-        //
+        return response()->json(['files' => $files]);
     }
 
     public function fileStore(Request $request) {
-        $upload_path = public_path('upload');
-        $file_name = $request->file->getClientOriginalName();
-        $generated_new_name = time().'.'.$request->file->getClientOriginalExtension();
-        //$request->file->move($upload_path, $generated_new_name);
-        $disk = Storage::disk('gcs');
-        $content = "";
-        $url = $disk->put('documents/'.$request->patient_id.'/'.$generated_new_name, $content);
+        if ($request->hasFile('files')) {
+            $files = $request->file('files');
+            $patietnId = $request->patient_id;
+            $count = 0;
+
+            foreach ($files as $file) {
+                $count++;
+                $path = $file->store('uploads/temp');
+
+                $file_name = $file->getClientOriginalName();
+                $insert['title'] = $file_name;
+                $generated_new_name = time().$count.'.'.$file->getClientOriginalExtension();
+
+                UploadFileJob::dispatchSync($path, $patietnId, $generated_new_name);
+                sleep(3);
+
+                Photo::create([
+                    'name'       => $generated_new_name,
+                    'title'      => $insert['title'],
+                    'patient_id' => $request->patient_id,
+                    'uri'        => 'documents/'.$request->patient_id.'/'.$generated_new_name
+                ]);
+            }
+            return response()->json(['message' => 'Files uploaded successfully'], 200);
+        }
         
-        $insert['title'] = $file_name;
-        Photo::create([
-            'title'      => $insert['title'],
-            'patient_id' => $request->patient_id,
-            'uri'        => 'documents/'.$request->patient_id.'/'.$generated_new_name
-        ]);
-        return response()->json(['success' => 'You have a succesefully uploaded "'. $file_name. '"']); 
+        return response()->json(['message' => 'Error on upload file'], 400); 
+    }
+
+    public function delete(Request $request)
+    {
+        $id        = $request->input('id'); 
+        $patientId = $request->input('patient_id');
+        $fileName  = $request->input('name');
+        $filePath  = 'documents/'.$patientId. '/'. $fileName;
+
+        try {
+            $deleted = Storage::disk('gcs')->delete($filePath);
+            if ($deleted) {
+                $photo = Photo::findOrFail($id);
+                $photo->delete();
+                return response()->json(['success' => true, 'message' => 'Archivo eliminado']);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Archivo no se pudo eliminar'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al eliminar el archivo: ' . $e->getMessage()], 500);
+        }
     }
 }

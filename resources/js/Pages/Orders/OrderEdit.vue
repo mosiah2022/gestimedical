@@ -3,7 +3,7 @@
         <span v-if="animation_wait === true" class="justify-center">Espere un momento por favor<ProgressSpinner  /></span>
         <div class="formgrid grid">
             <div class="field col">
-                <label class="font-bold">Paciente - <span>{{patient.personal_id}} </span></label>
+                <label class="font-bold text-teal-500">Paciente - <span>{{patient.personal_id}} </span></label>
                 <InputText v-model="patient.full_name" class="inputfield w-full" disabled="true" />
             </div>
             <div class="field col">
@@ -11,7 +11,7 @@
                 <Calendar id="icon" v-model="form.date_ini" :showIcon="true" dateFormat="dd/mm/yy" class="w-full" />
             </div>
             <div class="field col">
-                <label class="font-bold text teal-500">Seleccione teléfono <span class="pi pi-plus-circle justify-center cursor-pointer text-lime-600" @click="viewCreatePhone" label="Nuevo"  /></label>
+                <label class="font-bold text-teal-500">Seleccione teléfono <span class="pi pi-plus-circle justify-center cursor-pointer text-lime-600" @click="viewCreatePhone" label="Nuevo"  /></label>
                 <Dropdown class="w-full"
                     v-model="form.phone_id"
                     :options="phones"
@@ -51,38 +51,75 @@
             />
         </div>
         <div class="field col">
-            <label>Coloque nombre y apellido del Doctor</label>
+            <label class="font-bold text-teal-500">Coloque nombre y apellido del Doctor</label>
             <InputText v-model="form.doctor_name" class="inputfield w-full"  />
-        </div>        
+        </div>
         <MedicinesAdd :order_id="$props.editId" :patient_id="$props.patient_id" />
 
-        <div class="formgrid grid">
+        <div class="formgrid grid mt-4">
             <div class="field col">
-                <label>Código autorización - LM | EC | ARL</label>
+                <label class="font-bold text-teal-500">Código autorización - LM | EC | ARL</label>
                 <InputText v-model="form.lm_code" class="inputfield w-full" />
                 <small class="text-red-500">{{ error_lm_code }}</small>
             </div>
             <div class="field col">
-                <label>Autorizado por:</label>
+                <label class="font-bold text-teal-500">Autorizado por:</label>
                 <InputText v-model="form.authorized_by" class="inputfield w-full" />
             </div>
         </div>
         <div class="field col">
-            <label>Observaciones</label>
+            <label class="font-bold text-teal-500">Observaciones</label>
             <InputText v-model="form.observation" class="inputfield w-full" />
         </div>
-        <div class="field-checkbox">
-            <Checkbox id="copago" name="copago" value="0" v-model="copago_check" :binary="true" />
-            <label>Indique si tiene copago</label>
+        <div class="field-checkbox my-4">
+            <Checkbox inputId="copago" name="copago" value="0" v-model="copago_check" :binary="true" />
+            <label for="copago">Indique si tiene copago</label>
         </div>
         <div class="field col" v-if="copago_check === true">
-            <h5>Seleccione el Copago  {{ form.discount_percent }} %</h5>
-            <Slider v-model="form.discount_percent" :min="0" :max="100" />
+            <h5>Indique el Copago</h5>
+            <InputText v-model="form.discount_percent" class="w-full"/>
         </div>
-        
-        <FileUploadFile :patient_id="$props.patient_id"  />
 
-        <div class="field">
+        <FileUpload
+            name="file"
+            @uploader="uploadFiles($event)"
+            :multiple="true"
+            customUpload
+            :maxFileSize="1000000"
+            chooseLabel="Seleccionar"
+            uploadLabel="Subir"
+            cancelLabel="Cancelar"
+        >
+            <template #empty>
+                <span>Arrastre y suelte los archivos que quiera adjuntar a la orden</span>
+            </template>
+        </FileUpload>
+
+        <ConfirmPopup></ConfirmPopup>
+
+        <h2 v-if="uploadedFiles" class="font-bold text-lg text-blue-800 mt-4">Archivos adjuntos a la orden</h2>
+        <DataTable :value="uploadedFiles" tableStyle="min-width: 50rem" dataKey="id">
+            <Column field="name" class="lowercase">
+                <template #header>
+                    <span class="capitalize">Nombre</span>
+                </template>
+                <template #body="slotProps">
+                    <span class="lowercase">{{ slotProps.data.name }}</span>
+                </template>
+            </Column>
+            <Column bodyStyle="justify-end" header="Acción" headerStyle="width: 14rem; justify-center">
+                <template #body="slotProps">
+                    <a :href="slotProps.data.uri" target="_blank" title="Detalle">
+                        <i class="pi pi-eye mr-2 text-blue-600 font-bold" style="font-size: 1rem"></i>
+                    </a>
+                    <a href="#" title="Eliminar" @click.prevent="removeFile($event, slotProps.data.id,slotProps.data.name)">
+                        <i class="pi pi-trash mr-2 text-red-600 font-bold" style="font-size: 1rem"></i>
+                    </a>
+                </template>
+            </Column>
+        </DataTable>
+
+        <div class="field flex justify-end mt-4">
             <PrimeButton icon="pi pi-save" label="Guardar" class="sm:-bottom-1.5" @click="submitLm($props.editId)" />
         </div>
 
@@ -110,6 +147,11 @@ import CreateAddress from '../Patients/CreateAddress.vue'
 import CreateDiagnostic from '../Patients/CreateDiagnostic.vue'
 import MedicinesAdd from '../Medicines/MedicinesAdd.vue'
 import FileUploadFile from '../Uploads/FileUploadFile.vue'
+import DataTable from 'primevue/datatable'
+import { values } from 'lodash'
+import Column from 'primevue/column'
+import Swal from 'sweetalert2'
+import { min } from 'lodash'
 
 axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -151,7 +193,10 @@ export default {
             copago_check: false,
             animation_wait:false,
             lm_info: null,
-            pdfFile: null
+            pdfFile: null,
+            filename: null,
+            files: [],
+            uploadedFiles: null
         }
     },
     props: {
@@ -159,6 +204,74 @@ export default {
         patient_id: Number
     },
     methods: {
+        checkFile(id) {
+            console.log(id)
+        },
+        removeFile(event, id,fileName) {
+            this.$confirm.require({
+                target: event.currentTarget,
+                message: 'Seguro de eliminar este archivo?',
+                icon: 'pi pi-info-circle',
+                rejectProps: {
+                    label: 'Cancelar',
+                    severity: 'secondary',
+                    outlined: true
+                },
+                acceptProps: {
+                    label: 'Borrar',
+                    severity: 'danger'
+                },
+                accept: () => {
+                    axios.post('/api/delete_file', { id:id, name: fileName, patient_id: this.patient_id }).then(response => {
+                        this.uploadedFiles = this.uploadedFiles.filter(file => file.id !== id);
+                    })
+                    this.$toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Archivo eliminado', life: 3000 });
+                },
+                reject: () => {
+                    this.$toast.add({ severity: 'error', summary: 'Rejected', detail: 'No se logro eliminar el registro', life: 3000 });
+                }
+            })
+        },
+        async uploadFiles(event) {
+            this.files = event.files;
+            if (this.files && this.files.length > 0) {
+                let currentObj = this;
+                const config = {
+                    headers: {
+                        'content-type': 'multipart/form-data',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    }
+                }
+                let formData = new FormData();
+                for (let i = 0; i < this.files.length; i++) {
+                    formData.append('files[]', this.files[i]);
+                }
+                formData.append('patient_id', this.$props.patient_id);
+
+                axios.post('/api/store_file', formData, config).then(function (response){
+                    currentObj.success = response.data.success;
+                    currentObj.filename = "";
+                    console.log("Se a guardado correctamente el archivo");
+                    return this.emitter.emit('photo_reload')
+                })
+                .catch(function (error){
+                    currentObj.output = error;
+                })
+
+                this.filename = "";
+                this.files = [];
+                return this.emitter.emit('photo_reload');
+            }
+        },
+        async getListFiles() {
+            await axios.get(`/api/list_files/${this.patient_id}`)
+                .then(response => {
+                this.uploadedFiles = response.data.files;
+                })
+                .catch(error => {
+                console.error('Error fetching files:', error);
+                });
+        },
         async getOrder() {
             this.animation_wait = true
             await axios.get(`api/patient_lms/${this.edit_id}`).then((res) => {
@@ -211,11 +324,6 @@ export default {
         async setDiagnostic(){
             this.diagnostic_idold = this.form.diagnostic_id;
         },
-
-        onAdvancedUpload() {
-            this.$toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
-        },
-
         async submitLm(order) {
             try {
                 await axios.put(`/api/patient_lms/${order}`, this.form)
@@ -236,7 +344,8 @@ export default {
         this.edit_id = this.$props.editId
         this.getOrder();
         this.getProducts();
-        
+        this.getListFiles();
+
         this.emitter.on('photo_reload', ()=> {
             this.$toast.add({
                 severity:'success', summary: 'SUCCESS',

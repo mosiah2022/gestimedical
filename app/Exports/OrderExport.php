@@ -44,6 +44,25 @@ class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSiz
             return $query->where('invoice_number',$this->invoice);
         })->get()->groupBy('order.id');
 
+        $globalDiscount = 0;
+
+        $total = $query->map(function($order) use (&$globalDiscount) {
+            $orderTotal = array_reduce(
+                $order->toArray(),
+                function ($sum, $patient) {
+                    return $sum + ((float) $patient['product']['price'] * (float) $patient['prescription']);
+                },
+                0
+            );
+
+            $globalDiscount += (float) $order->first()['order']['discount_percent'];
+
+            return $orderTotal;
+        })->reduce(function($a, $b) {
+            return $a + $b;
+        });
+
+
         $getCompany = Invoice::where('invoice_number', $this->invoice)->with(['company'])->first();
         $nameCompany = $getCompany->company->name;
         $this->idCompany = $getCompany->company->id;
@@ -52,7 +71,9 @@ class OrderExport extends DefaultValueBinder implements  FromView, ShouldAutoSiz
             'orders' => $query,
             'invoice_number' => $this->invoice,
             'company' => $nameCompany,
-            'companyId' => $this->idCompany
+            'companyId' => $this->idCompany,
+            'total' => $total,
+            'globalDiscount' => $globalDiscount
         ]);
     }
 

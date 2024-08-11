@@ -22051,11 +22051,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Patients_CreateDiagnostic_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../Patients/CreateDiagnostic.vue */ "./resources/js/Pages/Patients/CreateDiagnostic.vue");
 /* harmony import */ var _Medicines_MedicinesAdd_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../Medicines/MedicinesAdd.vue */ "./resources/js/Pages/Medicines/MedicinesAdd.vue");
 /* harmony import */ var _Uploads_FileUploadFile_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../Uploads/FileUploadFile.vue */ "./resources/js/Pages/Uploads/FileUploadFile.vue");
+/* harmony import */ var primevue_datatable__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! primevue/datatable */ "./node_modules/primevue/datatable/datatable.esm.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var primevue_column__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! primevue/column */ "./node_modules/primevue/column/column.esm.js");
+/* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
+/* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(sweetalert2__WEBPACK_IMPORTED_MODULE_10__);
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
+
+
 
 
 
@@ -22102,7 +22113,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       copago_check: false,
       animation_wait: false,
       lm_info: null,
-      pdfFile: null
+      pdfFile: null,
+      filename: null,
+      files: [],
+      uploadedFiles: null
     };
   },
   props: {
@@ -22110,32 +22124,96 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     patient_id: Number
   },
   methods: {
-    getOrder: function getOrder() {
+    checkFile: function checkFile(id) {
+      console.log(id);
+    },
+    removeFile: function removeFile(event, id, fileName) {
       var _this = this;
 
+      this.$confirm.require({
+        target: event.currentTarget,
+        message: 'Seguro de eliminar este archivo?',
+        icon: 'pi pi-info-circle',
+        rejectProps: {
+          label: 'Cancelar',
+          severity: 'secondary',
+          outlined: true
+        },
+        acceptProps: {
+          label: 'Borrar',
+          severity: 'danger'
+        },
+        accept: function accept() {
+          axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/delete_file', {
+            id: id,
+            name: fileName,
+            patient_id: _this.patient_id
+          }).then(function (response) {
+            _this.uploadedFiles = _this.uploadedFiles.filter(function (file) {
+              return file.id !== id;
+            });
+          });
+
+          _this.$toast.add({
+            severity: 'info',
+            summary: 'Confirmed',
+            detail: 'Archivo eliminado',
+            life: 3000
+          });
+        },
+        reject: function reject() {
+          _this.$toast.add({
+            severity: 'error',
+            summary: 'Rejected',
+            detail: 'No se logro eliminar el registro',
+            life: 3000
+          });
+        }
+      });
+    },
+    uploadFiles: function uploadFiles(event) {
+      var _this2 = this;
+
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var currentObj, config, formData, i;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _this.animation_wait = true;
-                _context.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/patient_lms/".concat(_this.edit_id)).then(function (res) {
-                  _this.order = res.data;
-                  _this.orders = res.data.orders;
-                  _this.form = _this.order; //Initiate methods
+                _this2.files = event.files;
 
-                  //Initiate methods
-                  _this.getPhones(_this.order.patient_id, 'phone');
+                if (!(_this2.files && _this2.files.length > 0)) {
+                  _context.next = 11;
+                  break;
+                }
 
-                  _this.getDiagnostics(_this.order.patient_id);
+                currentObj = _this2;
+                config = {
+                  headers: {
+                    'content-type': 'multipart/form-data',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                  }
+                };
+                formData = new FormData();
 
-                  _this.getAddress(_this.order.patient_id, 'address');
+                for (i = 0; i < _this2.files.length; i++) {
+                  formData.append('files[]', _this2.files[i]);
+                }
 
-                  _this.getPatient(_this.order.patient_id);
+                formData.append('patient_id', _this2.$props.patient_id);
+                axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/store_file', formData, config).then(function (response) {
+                  currentObj.success = response.data.success;
+                  currentObj.filename = "";
+                  console.log("Se a guardado correctamente el archivo");
+                  return this.emitter.emit('photo_reload');
+                })["catch"](function (error) {
+                  currentObj.output = error;
                 });
+                _this2.filename = "";
+                _this2.files = [];
+                return _context.abrupt("return", _this2.emitter.emit('photo_reload'));
 
-              case 3:
+              case 11:
               case "end":
                 return _context.stop();
             }
@@ -22143,8 +22221,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee);
       }))();
     },
-    getPatient: function getPatient(id) {
-      var _this2 = this;
+    getListFiles: function getListFiles() {
+      var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
@@ -22152,9 +22230,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/patients/".concat(id)).then(function (res) {
-                  _this2.patient = res.data;
-                  _this2.animation_wait = false;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/list_files/".concat(_this3.patient_id)).then(function (response) {
+                  _this3.uploadedFiles = response.data.files;
+                })["catch"](function (error) {
+                  console.error('Error fetching files:', error);
                 });
 
               case 2:
@@ -22165,20 +22244,32 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee2);
       }))();
     },
-    getPhones: function getPhones(id, category) {
-      var _this3 = this;
+    getOrder: function getOrder() {
+      var _this4 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                _context3.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/address_patient/".concat(id, "/").concat(category)).then(function (res) {
-                  _this3.phones = res.data;
+                _this4.animation_wait = true;
+                _context3.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/patient_lms/".concat(_this4.edit_id)).then(function (res) {
+                  _this4.order = res.data;
+                  _this4.orders = res.data.orders;
+                  _this4.form = _this4.order; //Initiate methods
+
+                  //Initiate methods
+                  _this4.getPhones(_this4.order.patient_id, 'phone');
+
+                  _this4.getDiagnostics(_this4.order.patient_id);
+
+                  _this4.getAddress(_this4.order.patient_id, 'address');
+
+                  _this4.getPatient(_this4.order.patient_id);
                 });
 
-              case 2:
+              case 3:
               case "end":
                 return _context3.stop();
             }
@@ -22186,11 +22277,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee3);
       }))();
     },
-    viewCreatePhone: function viewCreatePhone() {
-      this.displayCreatePhone = true;
-    },
-    getDiagnostics: function getDiagnostics(id) {
-      var _this4 = this;
+    getPatient: function getPatient(id) {
+      var _this5 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
@@ -22198,8 +22286,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context4.prev = _context4.next) {
               case 0:
                 _context4.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/diagnostic_patient/".concat(id)).then(function (res) {
-                  _this4.diagnostics = res.data;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/patients/".concat(id)).then(function (res) {
+                  _this5.patient = res.data;
+                  _this5.animation_wait = false;
                 });
 
               case 2:
@@ -22210,11 +22299,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee4);
       }))();
     },
-    viewCreateDiagnostic: function viewCreateDiagnostic() {
-      this.displayCreateDiagnostic = true;
-    },
-    getAddress: function getAddress(id, category) {
-      var _this5 = this;
+    getPhones: function getPhones(id, category) {
+      var _this6 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
@@ -22223,7 +22309,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context5.next = 2;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/address_patient/".concat(id, "/").concat(category)).then(function (res) {
-                  _this5.addreses = res.data;
+                  _this6.phones = res.data;
                 });
 
               case 2:
@@ -22234,11 +22320,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee5);
       }))();
     },
-    viewCreateAddress: function viewCreateAddress() {
-      this.displayCreateAddress = true;
+    viewCreatePhone: function viewCreatePhone() {
+      this.displayCreatePhone = true;
     },
-    getProducts: function getProducts() {
-      var _this6 = this;
+    getDiagnostics: function getDiagnostics(id) {
+      var _this7 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
@@ -22246,8 +22332,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context6.prev = _context6.next) {
               case 0:
                 _context6.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get('api/products').then(function (res) {
-                  _this6.products = res.data;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/diagnostic_patient/".concat(id)).then(function (res) {
+                  _this7.diagnostics = res.data;
                 });
 
               case 2:
@@ -22258,17 +22344,23 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee6);
       }))();
     },
-    setDiagnostic: function setDiagnostic() {
-      var _this7 = this;
+    viewCreateDiagnostic: function viewCreateDiagnostic() {
+      this.displayCreateDiagnostic = true;
+    },
+    getAddress: function getAddress(id, category) {
+      var _this8 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee7() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                _this7.diagnostic_idold = _this7.form.diagnostic_id;
+                _context7.next = 2;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/address_patient/".concat(id, "/").concat(category)).then(function (res) {
+                  _this8.addreses = res.data;
+                });
 
-              case 1:
+              case 2:
               case "end":
                 return _context7.stop();
             }
@@ -22276,59 +22368,94 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee7);
       }))();
     },
-    onAdvancedUpload: function onAdvancedUpload() {
-      this.$toast.add({
-        severity: 'info',
-        summary: 'Success',
-        detail: 'File Uploaded',
-        life: 3000
-      });
+    viewCreateAddress: function viewCreateAddress() {
+      this.displayCreateAddress = true;
     },
-    submitLm: function submitLm(order) {
-      var _this8 = this;
+    getProducts: function getProducts() {
+      var _this9 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee8() {
-        var err;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                _context8.prev = 0;
-                _context8.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().put("/api/patient_lms/".concat(order), _this8.form);
+                _context8.next = 2;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get('api/products').then(function (res) {
+                  _this9.products = res.data;
+                });
+
+              case 2:
+              case "end":
+                return _context8.stop();
+            }
+          }
+        }, _callee8);
+      }))();
+    },
+    setDiagnostic: function setDiagnostic() {
+      var _this10 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee9() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee9$(_context9) {
+          while (1) {
+            switch (_context9.prev = _context9.next) {
+              case 0:
+                _this10.diagnostic_idold = _this10.form.diagnostic_id;
+
+              case 1:
+              case "end":
+                return _context9.stop();
+            }
+          }
+        }, _callee9);
+      }))();
+    },
+    submitLm: function submitLm(order) {
+      var _this11 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee10() {
+        var err;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee10$(_context10) {
+          while (1) {
+            switch (_context10.prev = _context10.next) {
+              case 0:
+                _context10.prev = 0;
+                _context10.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().put("/api/patient_lms/".concat(order), _this11.form);
 
               case 3:
-                return _context8.abrupt("return", _this8.emitter.emit('patientLm_reload'));
+                return _context10.abrupt("return", _this11.emitter.emit('patientLm_reload'));
 
               case 6:
-                _context8.prev = 6;
-                _context8.t0 = _context8["catch"](0);
+                _context10.prev = 6;
+                _context10.t0 = _context10["catch"](0);
 
-                if (_context8.t0.response) {
-                  switch (_context8.t0.response.status) {
+                if (_context10.t0.response) {
+                  switch (_context10.t0.response.status) {
                     case 422:
-                      err = _context8.t0.response.data.errors;
-                      _this8.error_lm_code = err.lm_code ? err.lm_code[0] : null;
+                      err = _context10.t0.response.data.errors;
+                      _this11.error_lm_code = err.lm_code ? err.lm_code[0] : null;
                   }
                 }
 
               case 9:
               case "end":
-                return _context8.stop();
+                return _context10.stop();
             }
           }
-        }, _callee8, null, [[0, 6]]);
+        }, _callee10, null, [[0, 6]]);
       }))();
     }
   },
   mounted: function mounted() {
-    var _this9 = this;
+    var _this12 = this;
 
     this.edit_id = this.$props.editId;
     this.getOrder();
     this.getProducts();
+    this.getListFiles();
     this.emitter.on('photo_reload', function () {
-      _this9.$toast.add({
+      _this12.$toast.add({
         severity: 'success',
         summary: 'SUCCESS',
         detail: 'Se a actualizado la información de la orden correctamente',
@@ -22476,6 +22603,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     var _this4 = this;
 
     this.emitter.on('patientLm_reload', function () {
+      _this4.displayOrderEdit = false;
+
       _this4.search();
 
       _this4.$toast.add({
@@ -27331,6 +27460,35 @@ var _hoisted_10 = {
 
 var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Espere un momento por favor ");
 
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "flex justify-center"
+}, "Cantidad", -1
+/* HOISTED */
+);
+
+var _hoisted_13 = {
+  "class": "flex justify-center"
+};
+
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "text-right w-full block"
+}, "Precio", -1
+/* HOISTED */
+);
+
+var _hoisted_15 = {
+  "class": "text-right w-full block font-medium"
+};
+
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "text-right w-full block"
+}, "Total", -1
+/* HOISTED */
+);
+
+var _hoisted_17 = {
+  "class": "text-right w-full block font-bold italic"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Dropdown = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Dropdown");
 
@@ -27388,6 +27546,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, null, 8
   /* PROPS */
   , ["onClick"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [$data.animation_wait === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_10, [_hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ProgressSpinner)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DataTable, {
+    stripedRows: "",
     filters: $data.filter,
     value: $data.details,
     dataKey: "id",
@@ -27423,13 +27582,31 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         /* STABLE */
 
       }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
-        field: "prescription",
-        header: "Cantidad"
+        field: "prescription"
+      }, {
+        header: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+          return [_hoisted_12];
+        }),
+        body: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (slotProps) {
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(slotProps.data.prescription), 1
+          /* TEXT */
+          )];
+        }),
+        _: 1
+        /* STABLE */
+
       }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
         field: "products.price",
-        header: "Precio",
         dataType: "numeric"
       }, {
+        header: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+          return [_hoisted_14];
+        }),
+        body: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (slotProps) {
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.formatCurrency(slotProps.data.products.price)), 1
+          /* TEXT */
+          )];
+        }),
         editor: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref2) {
           var data = _ref2.data;
           return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" {{ data.products.price[field] }} "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
@@ -27445,12 +27622,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         _: 1
         /* STABLE */
 
-      }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
-        header: "Total"
-      }, {
+      }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, null, {
+        header: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+          return [_hoisted_16];
+        }),
         body: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref3) {
           var data = _ref3.data;
-          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.formatCurrency(data.products.price * data.prescription)), 1
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.formatCurrency(data.products.price * data.prescription)), 1
           /* TEXT */
           )];
         }),
@@ -27558,7 +27736,7 @@ var _hoisted_5 = {
   "class": "field col"
 };
 var _hoisted_6 = {
-  "class": "font-bold"
+  "class": "font-bold text-teal-500"
 };
 
 var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Paciente - ");
@@ -27577,7 +27755,7 @@ var _hoisted_10 = {
   "class": "field col"
 };
 var _hoisted_11 = {
-  "class": "font-bold text teal-500"
+  "class": "font-bold text-teal-500"
 };
 
 var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Seleccione teléfono ");
@@ -27604,18 +27782,22 @@ var _hoisted_19 = {
   "class": "field col"
 };
 
-var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Coloque nombre y apellido del Doctor", -1
+var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  "class": "font-bold text-teal-500"
+}, "Coloque nombre y apellido del Doctor", -1
 /* HOISTED */
 );
 
 var _hoisted_21 = {
-  "class": "formgrid grid"
+  "class": "formgrid grid mt-4"
 };
 var _hoisted_22 = {
   "class": "field col"
 };
 
-var _hoisted_23 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Código autorización - LM | EC | ARL", -1
+var _hoisted_23 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  "class": "font-bold text-teal-500"
+}, "Código autorización - LM | EC | ARL", -1
 /* HOISTED */
 );
 
@@ -27626,7 +27808,9 @@ var _hoisted_25 = {
   "class": "field col"
 };
 
-var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Autorizado por:", -1
+var _hoisted_26 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  "class": "font-bold text-teal-500"
+}, "Autorizado por:", -1
 /* HOISTED */
 );
 
@@ -27634,15 +27818,19 @@ var _hoisted_27 = {
   "class": "field col"
 };
 
-var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Observaciones", -1
+var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  "class": "font-bold text-teal-500"
+}, "Observaciones", -1
 /* HOISTED */
 );
 
 var _hoisted_29 = {
-  "class": "field-checkbox"
+  "class": "field-checkbox my-4"
 };
 
-var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Indique si tiene copago", -1
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  "for": "copago"
+}, "Indique si tiene copago", -1
 /* HOISTED */
 );
 
@@ -27650,8 +27838,55 @@ var _hoisted_31 = {
   key: 1,
   "class": "field col"
 };
-var _hoisted_32 = {
-  "class": "field"
+
+var _hoisted_32 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, "Indique el Copago", -1
+/* HOISTED */
+);
+
+var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, "Arrastre y suelte los archivos que quiera adjuntar a la orden", -1
+/* HOISTED */
+);
+
+var _hoisted_34 = {
+  key: 2,
+  "class": "font-bold text-lg text-blue-800 mt-4"
+};
+
+var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "capitalize"
+}, "Nombre", -1
+/* HOISTED */
+);
+
+var _hoisted_36 = {
+  "class": "lowercase"
+};
+var _hoisted_37 = ["href"];
+
+var _hoisted_38 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", {
+  "class": "pi pi-eye mr-2 text-blue-600 font-bold",
+  style: {
+    "font-size": "1rem"
+  }
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_39 = [_hoisted_38];
+var _hoisted_40 = ["onClick"];
+
+var _hoisted_41 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", {
+  "class": "pi pi-trash mr-2 text-red-600 font-bold",
+  style: {
+    "font-size": "1rem"
+  }
+}, null, -1
+/* HOISTED */
+);
+
+var _hoisted_42 = [_hoisted_41];
+var _hoisted_43 = {
+  "class": "field flex justify-end mt-4"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_ProgressSpinner = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ProgressSpinner");
@@ -27666,9 +27901,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   var _component_Checkbox = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Checkbox");
 
-  var _component_Slider = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Slider");
+  var _component_FileUpload = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("FileUpload");
 
-  var _component_FileUploadFile = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("FileUploadFile");
+  var _component_ConfirmPopup = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ConfirmPopup");
+
+  var _component_Column = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Column");
+
+  var _component_DataTable = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("DataTable");
 
   var _component_PrimeButton = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("PrimeButton");
 
@@ -27807,7 +28046,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, null, 8
   /* PROPS */
   , ["modelValue"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Checkbox, {
-    id: "copago",
+    inputId: "copago",
     name: "copago",
     value: "0",
     modelValue: $data.copago_check,
@@ -27817,26 +28056,90 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     binary: true
   }, null, 8
   /* PROPS */
-  , ["modelValue"]), _hoisted_30]), $data.copago_check === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_31, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", null, "Seleccione el Copago " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.form.discount_percent) + " %", 1
-  /* TEXT */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Slider, {
+  , ["modelValue"]), _hoisted_30]), $data.copago_check === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_31, [_hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
     modelValue: $data.form.discount_percent,
     "onUpdate:modelValue": _cache[14] || (_cache[14] = function ($event) {
       return $data.form.discount_percent = $event;
     }),
-    min: 0,
-    max: 100
+    "class": "w-full"
   }, null, 8
   /* PROPS */
-  , ["modelValue"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_FileUploadFile, {
-    patient_id: _ctx.$props.patient_id
-  }, null, 8
+  , ["modelValue"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_FileUpload, {
+    name: "file",
+    onUploader: _cache[15] || (_cache[15] = function ($event) {
+      return $options.uploadFiles($event);
+    }),
+    multiple: true,
+    customUpload: "",
+    maxFileSize: 1000000,
+    chooseLabel: "Seleccionar",
+    uploadLabel: "Subir",
+    cancelLabel: "Cancelar"
+  }, {
+    empty: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+      return [_hoisted_33];
+    }),
+    _: 1
+    /* STABLE */
+
+  }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ConfirmPopup), $data.uploadedFiles ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h2", _hoisted_34, "Archivos adjuntos a la orden")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DataTable, {
+    value: $data.uploadedFiles,
+    tableStyle: "min-width: 50rem",
+    dataKey: "id"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
+        field: "name",
+        "class": "lowercase"
+      }, {
+        header: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+          return [_hoisted_35];
+        }),
+        body: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (slotProps) {
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_36, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(slotProps.data.name), 1
+          /* TEXT */
+          )];
+        }),
+        _: 1
+        /* STABLE */
+
+      }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
+        bodyStyle: "justify-end",
+        header: "Acción",
+        headerStyle: "width: 14rem; justify-center"
+      }, {
+        body: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (slotProps) {
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+            href: slotProps.data.uri,
+            target: "_blank",
+            title: "Detalle"
+          }, _hoisted_39, 8
+          /* PROPS */
+          , _hoisted_37), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+            href: "#",
+            title: "Eliminar",
+            onClick: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+              return $options.removeFile($event, slotProps.data.id, slotProps.data.name);
+            }, ["prevent"])
+          }, _hoisted_42, 8
+          /* PROPS */
+          , _hoisted_40)];
+        }),
+        _: 1
+        /* STABLE */
+
+      })];
+    }),
+    _: 1
+    /* STABLE */
+
+  }, 8
   /* PROPS */
-  , ["patient_id"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
+  , ["value"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
     icon: "pi pi-save",
     label: "Guardar",
     "class": "sm:-bottom-1.5",
-    onClick: _cache[15] || (_cache[15] = function ($event) {
+    onClick: _cache[16] || (_cache[16] = function ($event) {
       return $options.submitLm(_ctx.$props.editId);
     })
   })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Dialog, {
@@ -27845,7 +28148,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       width: '25vw'
     },
     visible: $data.displayCreatePhone,
-    "onUpdate:visible": _cache[16] || (_cache[16] = function ($event) {
+    "onUpdate:visible": _cache[17] || (_cache[17] = function ($event) {
       return $data.displayCreatePhone = $event;
     }),
     maximizable: false
@@ -27868,7 +28171,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       width: '25vw'
     },
     visible: $data.displayCreateAddress,
-    "onUpdate:visible": _cache[17] || (_cache[17] = function ($event) {
+    "onUpdate:visible": _cache[18] || (_cache[18] = function ($event) {
       return $data.displayCreateAddress = $event;
     }),
     maximizable: false
@@ -27891,7 +28194,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       width: '25vw'
     },
     visible: $data.displayCreateDiagnostic,
-    "onUpdate:visible": _cache[18] || (_cache[18] = function ($event) {
+    "onUpdate:visible": _cache[19] || (_cache[19] = function ($event) {
       return $data.displayCreateDiagnostic = $event;
     }),
     maximizable: false
@@ -27948,21 +28251,7 @@ var _hoisted_5 = {
   "class": "p-6 bg-white border-b border-gray-200"
 };
 var _hoisted_6 = {
-  "class": "p-field"
-};
-
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Buscar", -1
-/* HOISTED */
-);
-
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("small", {
-  "class": "text-red-500"
-}, null, -1
-/* HOISTED */
-);
-
-var _hoisted_9 = {
-  "class": "p-field"
+  "class": "p-field flex items-center space-x-2"
 };
 
 (0,vue__WEBPACK_IMPORTED_MODULE_0__.popScopeId)();
@@ -27991,7 +28280,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return [_hoisted_1];
     }),
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
         modelValue: $data.form.search,
         "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
           return $data.form.search = $event;
@@ -27999,10 +28288,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "class": "w-full"
       }, null, 8
       /* PROPS */
-      , ["modelValue"]), _hoisted_8]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
+      , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
         icon: "pi pi-search",
         label: "Buscar",
-        "class": "sm:-bottom-1.5",
+        "class": "p-button p-button-primary",
         onClick: $options.search
       }, null, 8
       /* PROPS */
@@ -29751,6 +30040,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var primevue_tabview__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! primevue/tabview */ "./node_modules/primevue/tabview/tabview.esm.js");
 /* harmony import */ var primevue_tabpanel__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! primevue/tabpanel */ "./node_modules/primevue/tabpanel/tabpanel.esm.js");
 /* harmony import */ var primevue_fileupload__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! primevue/fileupload */ "./node_modules/primevue/fileupload/fileupload.esm.js");
+/* harmony import */ var primevue_confirmationservice__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! primevue/confirmationservice */ "./node_modules/primevue/confirmationservice/confirmationservice.esm.js");
+/* harmony import */ var primevue_confirmpopup__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! primevue/confirmpopup */ "./node_modules/primevue/confirmpopup/confirmpopup.esm.js");
 var _window$document$getE;
 
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
@@ -29765,6 +30056,8 @@ __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 
  //import libraries
+
+
 
 
 
@@ -29807,7 +30100,7 @@ var emitter = (0,mitt__WEBPACK_IMPORTED_MODULE_4__["default"])();
         return (0,vue__WEBPACK_IMPORTED_MODULE_0__.h)(app, props);
       }
     });
-    vueApp.component('AutoComplete', primevue_autocomplete__WEBPACK_IMPORTED_MODULE_10__["default"]).component('DataTable', primevue_datatable__WEBPACK_IMPORTED_MODULE_11__["default"]).component('InputText', primevue_inputtext__WEBPACK_IMPORTED_MODULE_12__["default"]).component('InputNumber', primevue_inputnumber__WEBPACK_IMPORTED_MODULE_13__["default"]).component('Column', primevue_column__WEBPACK_IMPORTED_MODULE_14__["default"]).component('Dialog', primevue_dialog__WEBPACK_IMPORTED_MODULE_15__["default"]).component('Toast', primevue_toast__WEBPACK_IMPORTED_MODULE_17__["default"]).component('Card', primevue_card__WEBPACK_IMPORTED_MODULE_18__["default"]).component('TextArea', primevue_textarea__WEBPACK_IMPORTED_MODULE_19__["default"]).component('PrimeButton', primevue_button__WEBPACK_IMPORTED_MODULE_20__["default"]).component('Dropdown', primevue_dropdown__WEBPACK_IMPORTED_MODULE_21__["default"]).component('Calendar', primevue_calendar__WEBPACK_IMPORTED_MODULE_22__["default"]).component('RadioButton', primevue_radiobutton__WEBPACK_IMPORTED_MODULE_23__["default"]).component('InputMask', primevue_inputmask__WEBPACK_IMPORTED_MODULE_24__["default"]).component('Checkbox', primevue_checkbox__WEBPACK_IMPORTED_MODULE_25__["default"]).component('Slider', primevue_slider__WEBPACK_IMPORTED_MODULE_26__["default"]).component('ProgressSpinner', primevue_progressspinner__WEBPACK_IMPORTED_MODULE_27__["default"]).component('FileUpload', primevue_fileupload__WEBPACK_IMPORTED_MODULE_31__["default"]).component('Message', primevue_message__WEBPACK_IMPORTED_MODULE_28__["default"]).component('TabView', primevue_tabview__WEBPACK_IMPORTED_MODULE_29__["default"]).component('TabPanel', primevue_tabpanel__WEBPACK_IMPORTED_MODULE_30__["default"]).use(plugin).use(primevue_config__WEBPACK_IMPORTED_MODULE_3__["default"]).use(primevue_toastservice__WEBPACK_IMPORTED_MODULE_16__["default"]).use((vue_sweetalert2__WEBPACK_IMPORTED_MODULE_5___default())).mixin({
+    vueApp.component('AutoComplete', primevue_autocomplete__WEBPACK_IMPORTED_MODULE_10__["default"]).component('DataTable', primevue_datatable__WEBPACK_IMPORTED_MODULE_11__["default"]).component('InputText', primevue_inputtext__WEBPACK_IMPORTED_MODULE_12__["default"]).component('InputNumber', primevue_inputnumber__WEBPACK_IMPORTED_MODULE_13__["default"]).component('Column', primevue_column__WEBPACK_IMPORTED_MODULE_14__["default"]).component('Dialog', primevue_dialog__WEBPACK_IMPORTED_MODULE_15__["default"]).component('Toast', primevue_toast__WEBPACK_IMPORTED_MODULE_17__["default"]).component('Card', primevue_card__WEBPACK_IMPORTED_MODULE_18__["default"]).component('TextArea', primevue_textarea__WEBPACK_IMPORTED_MODULE_19__["default"]).component('PrimeButton', primevue_button__WEBPACK_IMPORTED_MODULE_20__["default"]).component('Dropdown', primevue_dropdown__WEBPACK_IMPORTED_MODULE_21__["default"]).component('Calendar', primevue_calendar__WEBPACK_IMPORTED_MODULE_22__["default"]).component('RadioButton', primevue_radiobutton__WEBPACK_IMPORTED_MODULE_23__["default"]).component('InputMask', primevue_inputmask__WEBPACK_IMPORTED_MODULE_24__["default"]).component('Checkbox', primevue_checkbox__WEBPACK_IMPORTED_MODULE_25__["default"]).component('Slider', primevue_slider__WEBPACK_IMPORTED_MODULE_26__["default"]).component('ProgressSpinner', primevue_progressspinner__WEBPACK_IMPORTED_MODULE_27__["default"]).component('FileUpload', primevue_fileupload__WEBPACK_IMPORTED_MODULE_31__["default"]).component('Message', primevue_message__WEBPACK_IMPORTED_MODULE_28__["default"]).component('TabView', primevue_tabview__WEBPACK_IMPORTED_MODULE_29__["default"]).component('TabPanel', primevue_tabpanel__WEBPACK_IMPORTED_MODULE_30__["default"]).component('ConfirmPopup', primevue_confirmpopup__WEBPACK_IMPORTED_MODULE_33__["default"]).use(plugin).use(primevue_config__WEBPACK_IMPORTED_MODULE_3__["default"]).use(primevue_toastservice__WEBPACK_IMPORTED_MODULE_16__["default"]).use((vue_sweetalert2__WEBPACK_IMPORTED_MODULE_5___default())).use(primevue_confirmationservice__WEBPACK_IMPORTED_MODULE_32__["default"]).mixin({
       methods: {
         route: route
       }
@@ -29839,6 +30132,7 @@ window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
@@ -58162,6 +58456,374 @@ var PrimeVue = {
 
 /***/ }),
 
+/***/ "./node_modules/primevue/confirmationeventbus/confirmationeventbus.esm.js":
+/*!********************************************************************************!*\
+  !*** ./node_modules/primevue/confirmationeventbus/confirmationeventbus.esm.js ***!
+  \********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var primevue_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! primevue/utils */ "./node_modules/primevue/utils/utils.esm.js");
+
+
+var ConfirmationEventBus = (0,primevue_utils__WEBPACK_IMPORTED_MODULE_0__.EventBus)();
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ConfirmationEventBus);
+
+
+/***/ }),
+
+/***/ "./node_modules/primevue/confirmationservice/confirmationservice.esm.js":
+/*!******************************************************************************!*\
+  !*** ./node_modules/primevue/confirmationservice/confirmationservice.esm.js ***!
+  \******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var primevue_confirmationeventbus__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! primevue/confirmationeventbus */ "./node_modules/primevue/confirmationeventbus/confirmationeventbus.esm.js");
+/* harmony import */ var primevue_useconfirm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! primevue/useconfirm */ "./node_modules/primevue/useconfirm/useconfirm.esm.js");
+
+
+
+var ConfirmationService = {
+    install: (app) => {
+        const ConfirmationService = {
+            require: (options) => {
+                primevue_confirmationeventbus__WEBPACK_IMPORTED_MODULE_0__["default"].emit('confirm', options);
+            },
+            close: () => {
+                primevue_confirmationeventbus__WEBPACK_IMPORTED_MODULE_0__["default"].emit('close');
+            }
+        };
+        app.config.globalProperties.$confirm = ConfirmationService;
+        app.provide(primevue_useconfirm__WEBPACK_IMPORTED_MODULE_1__.PrimeVueConfirmSymbol, ConfirmationService);
+    }
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ConfirmationService);
+
+
+/***/ }),
+
+/***/ "./node_modules/primevue/confirmpopup/confirmpopup.esm.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/primevue/confirmpopup/confirmpopup.esm.js ***!
+  \****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var primevue_confirmationeventbus__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! primevue/confirmationeventbus */ "./node_modules/primevue/confirmationeventbus/confirmationeventbus.esm.js");
+/* harmony import */ var primevue_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! primevue/utils */ "./node_modules/primevue/utils/utils.esm.js");
+/* harmony import */ var primevue_overlayeventbus__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! primevue/overlayeventbus */ "./node_modules/primevue/overlayeventbus/overlayeventbus.esm.js");
+/* harmony import */ var primevue_button__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! primevue/button */ "./node_modules/primevue/button/button.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+
+
+
+
+
+var script = {
+    name: 'ConfirmPopup',
+    inheritAttrs: false,
+    props: {
+        group: String
+    },
+    data() {
+        return {
+            visible: false,
+            confirmation: null
+        }
+    },
+    target: null,
+    outsideClickListener: null,
+    scrollHandler: null,
+    resizeListener: null,
+    container: null,
+    confirmListener: null,
+    closeListener: null,
+    mounted() {
+        this.confirmListener = (options) => {
+            if (!options) {
+                return;
+            }
+
+            if (options.group === this.group) {
+                this.confirmation = options;
+                this.target = options.target;
+                this.visible = true;
+            }
+        };
+        this.closeListener = () => {
+            this.visible = false;
+            this.confirmation = null;
+        };
+        primevue_confirmationeventbus__WEBPACK_IMPORTED_MODULE_0__["default"].on('confirm', this.confirmListener);
+        primevue_confirmationeventbus__WEBPACK_IMPORTED_MODULE_0__["default"].on('close', this.closeListener);
+    },
+    beforeUnmount() {
+        primevue_confirmationeventbus__WEBPACK_IMPORTED_MODULE_0__["default"].off('confirm', this.confirmListener);
+        primevue_confirmationeventbus__WEBPACK_IMPORTED_MODULE_0__["default"].off('close', this.closeListener);
+
+        this.unbindOutsideClickListener();
+        if (this.scrollHandler) {
+            this.scrollHandler.destroy();
+            this.scrollHandler = null;
+        }
+        this.unbindResizeListener();
+
+        if (this.container) {
+            primevue_utils__WEBPACK_IMPORTED_MODULE_1__.ZIndexUtils.clear(this.container);
+            this.container = null;
+        }
+
+        this.target = null;
+        this.confirmation = null;
+    },
+    methods: {
+         accept() {
+            if (this.confirmation.accept) {
+                this.confirmation.accept();
+            }
+
+            this.visible = false;
+        },
+        reject() {
+            if (this.confirmation.reject) {
+                this.confirmation.reject();
+            }
+
+            this.visible = false;
+        },
+        onEnter(el) {
+            this.alignOverlay();
+            this.bindOutsideClickListener();
+            this.bindScrollListener();
+            this.bindResizeListener();
+
+            primevue_utils__WEBPACK_IMPORTED_MODULE_1__.ZIndexUtils.set('overlay', el, this.$primevue.config.zIndex.overlay);
+        },
+        onLeave() {
+            this.unbindOutsideClickListener();
+            this.unbindScrollListener();
+            this.unbindResizeListener();
+        },
+        onAfterLeave(el) {
+            primevue_utils__WEBPACK_IMPORTED_MODULE_1__.ZIndexUtils.clear(el);
+        },
+        alignOverlay() {
+            primevue_utils__WEBPACK_IMPORTED_MODULE_1__.DomHandler.absolutePosition(this.container, this.target);
+
+            const containerOffset = primevue_utils__WEBPACK_IMPORTED_MODULE_1__.DomHandler.getOffset(this.container);
+            const targetOffset = primevue_utils__WEBPACK_IMPORTED_MODULE_1__.DomHandler.getOffset(this.target);
+            let arrowLeft = 0;
+
+            if (containerOffset.left < targetOffset.left) {
+                arrowLeft = targetOffset.left - containerOffset.left;
+            }
+            this.container.style.setProperty('--overlayArrowLeft', `${arrowLeft}px`);
+
+            if (containerOffset.top < targetOffset.top) {
+                primevue_utils__WEBPACK_IMPORTED_MODULE_1__.DomHandler.addClass(this.container, 'p-confirm-popup-flipped');
+            }
+        },
+        bindOutsideClickListener() {
+            if (!this.outsideClickListener) {
+                this.outsideClickListener = (event) => {
+                    if (this.visible && this.container && !this.container.contains(event.target) && !this.isTargetClicked(event)) {
+                        this.visible = false;
+                    }
+                };
+                document.addEventListener('click', this.outsideClickListener);
+            }
+        },
+        unbindOutsideClickListener() {
+            if (this.outsideClickListener) {
+                document.removeEventListener('click', this.outsideClickListener);
+                this.outsideClickListener = null;
+            }
+        },
+        bindScrollListener() {
+            if (!this.scrollHandler) {
+                this.scrollHandler = new primevue_utils__WEBPACK_IMPORTED_MODULE_1__.ConnectedOverlayScrollHandler(this.target, () => {
+                    if (this.visible) {
+                        this.visible = false;
+                    }
+                });
+            }
+
+            this.scrollHandler.bindScrollListener();
+        },
+        unbindScrollListener() {
+            if (this.scrollHandler) {
+                this.scrollHandler.unbindScrollListener();
+            }
+        },
+        bindResizeListener() {
+            if (!this.resizeListener) {
+                this.resizeListener = () => {
+                    if (this.visible) {
+                        this.visible = false;
+                    }
+                };
+                window.addEventListener('resize', this.resizeListener);
+            }
+        },
+        unbindResizeListener() {
+            if (this.resizeListener) {
+                window.removeEventListener('resize', this.resizeListener);
+                this.resizeListener = null;
+            }
+        },
+        isTargetClicked() {
+            return this.target && (this.target === event.target || this.target.contains(event.target));
+        },
+        containerRef(el) {
+            this.container = el;
+        },
+        onOverlayClick(event) {
+            primevue_overlayeventbus__WEBPACK_IMPORTED_MODULE_2__["default"].emit('overlay-click', {
+                originalEvent: event,
+                target: this.target
+            });
+        }
+    },
+    computed: {
+        containerClass() {
+            return ['p-confirm-popup p-component', {
+                'p-input-filled': this.$primevue.config.inputStyle === 'filled',
+                'p-ripple-disabled': this.$primevue.config.ripple === false
+            }];
+        },
+        message() {
+            return this.confirmation ? this.confirmation.message : null;
+        },
+        iconClass() {
+            return ['p-confirm-popup-icon', this.confirmation ? this.confirmation.icon : null];
+        },
+        acceptLabel() {
+            return this.confirmation ? (this.confirmation.acceptLabel || this.$primevue.config.locale.accept) : null;
+        },
+        rejectLabel() {
+            return this.confirmation ? (this.confirmation.rejectLabel || this.$primevue.config.locale.reject) : null;
+        },
+        acceptIcon() {
+            return this.confirmation ? this.confirmation.acceptIcon : null;
+        },
+        rejectIcon() {
+            return this.confirmation ? this.confirmation.rejectIcon : null;
+        },
+        acceptClass() {
+            return ['p-confirm-popup-accept p-button-sm', this.confirmation ? this.confirmation.acceptClass : null];
+        },
+        rejectClass() {
+            return ['p-confirm-popup-reject p-button-sm', this.confirmation ? (this.confirmation.rejectClass || 'p-button-text') : null];
+        }
+    },
+    components: {
+        'CPButton': primevue_button__WEBPACK_IMPORTED_MODULE_3__["default"]
+    }
+};
+
+const _hoisted_1 = { class: "p-confirm-popup-content" };
+const _hoisted_2 = { class: "p-confirm-popup-message" };
+const _hoisted_3 = { class: "p-confirm-popup-footer" };
+
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_CPButton = (0,vue__WEBPACK_IMPORTED_MODULE_4__.resolveComponent)("CPButton");
+
+  return ((0,vue__WEBPACK_IMPORTED_MODULE_4__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_4__.createBlock)(vue__WEBPACK_IMPORTED_MODULE_4__.Teleport, { to: "body" }, [
+    (0,vue__WEBPACK_IMPORTED_MODULE_4__.createVNode)(vue__WEBPACK_IMPORTED_MODULE_4__.Transition, {
+      name: "p-confirm-popup",
+      onEnter: $options.onEnter,
+      onLeave: $options.onLeave,
+      onAfterLeave: $options.onAfterLeave
+    }, {
+      default: (0,vue__WEBPACK_IMPORTED_MODULE_4__.withCtx)(() => [
+        ($data.visible)
+          ? ((0,vue__WEBPACK_IMPORTED_MODULE_4__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_4__.createBlock)("div", (0,vue__WEBPACK_IMPORTED_MODULE_4__.mergeProps)({
+              key: 0,
+              class: $options.containerClass,
+              ref: $options.containerRef
+            }, _ctx.$attrs, {
+              onClick: _cache[3] || (_cache[3] = (...args) => ($options.onOverlayClick && $options.onOverlayClick(...args)))
+            }), [
+              (0,vue__WEBPACK_IMPORTED_MODULE_4__.createVNode)("div", _hoisted_1, [
+                (0,vue__WEBPACK_IMPORTED_MODULE_4__.createVNode)("i", { class: $options.iconClass }, null, 2),
+                (0,vue__WEBPACK_IMPORTED_MODULE_4__.createVNode)("span", _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_4__.toDisplayString)($data.confirmation.message), 1)
+              ]),
+              (0,vue__WEBPACK_IMPORTED_MODULE_4__.createVNode)("div", _hoisted_3, [
+                (0,vue__WEBPACK_IMPORTED_MODULE_4__.createVNode)(_component_CPButton, {
+                  label: $options.rejectLabel,
+                  icon: $options.rejectIcon,
+                  class: $options.rejectClass,
+                  onClick: _cache[1] || (_cache[1] = $event => ($options.reject()))
+                }, null, 8, ["label", "icon", "class"]),
+                (0,vue__WEBPACK_IMPORTED_MODULE_4__.createVNode)(_component_CPButton, {
+                  label: $options.acceptLabel,
+                  icon: $options.acceptIcon,
+                  class: $options.acceptClass,
+                  onClick: _cache[2] || (_cache[2] = $event => ($options.accept())),
+                  autofocus: ""
+                }, null, 8, ["label", "icon", "class"])
+              ])
+            ], 16))
+          : (0,vue__WEBPACK_IMPORTED_MODULE_4__.createCommentVNode)("", true)
+      ]),
+      _: 1
+    }, 8, ["onEnter", "onLeave", "onAfterLeave"])
+  ]))
+}
+
+function styleInject(css, ref) {
+  if ( ref === void 0 ) ref = {};
+  var insertAt = ref.insertAt;
+
+  if (!css || typeof document === 'undefined') { return; }
+
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
+
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var css_248z = "\n.p-confirm-popup {\n    position: absolute;\n    margin-top: 10px;\n    top: 0;\n    left: 0;\n}\n.p-confirm-popup-flipped {\n    margin-top: 0;\n    margin-bottom: 10px;\n}\n\n/* Animation */\n.p-confirm-popup-enter-from {\n    opacity: 0;\n    -webkit-transform: scaleY(0.8);\n            transform: scaleY(0.8);\n}\n.p-confirm-popup-leave-to {\n    opacity: 0;\n}\n.p-confirm-popup-enter-active {\n    -webkit-transition: opacity .12s cubic-bezier(0, 0, 0.2, 1), -webkit-transform .12s cubic-bezier(0, 0, 0.2, 1);\n    transition: opacity .12s cubic-bezier(0, 0, 0.2, 1), -webkit-transform .12s cubic-bezier(0, 0, 0.2, 1);\n    transition: transform .12s cubic-bezier(0, 0, 0.2, 1), opacity .12s cubic-bezier(0, 0, 0.2, 1);\n    transition: transform .12s cubic-bezier(0, 0, 0.2, 1), opacity .12s cubic-bezier(0, 0, 0.2, 1), -webkit-transform .12s cubic-bezier(0, 0, 0.2, 1);\n}\n.p-confirm-popup-leave-active {\n    -webkit-transition: opacity .1s linear;\n    transition: opacity .1s linear;\n}\n.p-confirm-popup:after, .p-confirm-popup:before {\n\tbottom: 100%;\n\tleft: calc(var(--overlayArrowLeft, 0) + 1.25rem);\n\tcontent: \" \";\n\theight: 0;\n\twidth: 0;\n\tposition: absolute;\n\tpointer-events: none;\n}\n.p-confirm-popup:after {\n\tborder-width: 8px;\n\tmargin-left: -8px;\n}\n.p-confirm-popup:before {\n\tborder-width: 10px;\n\tmargin-left: -10px;\n}\n.p-confirm-popup-flipped:after, .p-confirm-popup-flipped:before {\n    bottom: auto;\n    top: 100%;\n}\n.p-confirm-popup.p-confirm-popup-flipped:after {\n    border-bottom-color: transparent;\n}\n.p-confirm-popup.p-confirm-popup-flipped:before {\n    border-bottom-color: transparent\n}\n.p-confirm-popup .p-confirm-popup-content {\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n}\n";
+styleInject(css_248z);
+
+script.render = render;
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (script);
+
+
+/***/ }),
+
 /***/ "./node_modules/primevue/datatable/datatable.esm.js":
 /*!**********************************************************!*\
   !*** ./node_modules/primevue/datatable/datatable.esm.js ***!
@@ -69154,6 +69816,37 @@ var ToastService = {
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ToastService);
+
+
+/***/ }),
+
+/***/ "./node_modules/primevue/useconfirm/useconfirm.esm.js":
+/*!************************************************************!*\
+  !*** ./node_modules/primevue/useconfirm/useconfirm.esm.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "PrimeVueConfirmSymbol": () => (/* binding */ PrimeVueConfirmSymbol),
+/* harmony export */   "useConfirm": () => (/* binding */ useConfirm)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+
+const PrimeVueConfirmSymbol = Symbol();
+
+function useConfirm() {
+    const PrimeVueConfirm = (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(PrimeVueConfirmSymbol);
+    if (!PrimeVueConfirm) {
+        throw new Error('No PrimeVue Confirmation provided!');
+    } 
+
+    return PrimeVueConfirm;
+}
+
+
 
 
 /***/ }),

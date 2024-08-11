@@ -25,23 +25,49 @@
 
         <div>
             <span class="justify-center" v-if="animation_wait === true">Espere un momento por favor <ProgressSpinner /></span>
-            <DataTable :filters="filter" :value="details" dataKey="id" responsiveLayout="scroll" editMode="row"
-                v-model:editingRows="editingRows" @row-edit-save="onRowEditSave" :paginate="true" :rows="20" class="editable-cells-table">
+            <DataTable 
+                stripedRows
+                :filters="filter" 
+                :value="details" 
+                dataKey="id" 
+                responsiveLayout="scroll" 
+                editMode="row"
+                v-model:editingRows="editingRows" 
+                @row-edit-save="onRowEditSave" 
+                :paginate="true" :rows="20" 
+                class="editable-cells-table"
+            >
                 <Column field="products.name" header="Medicamento">
                     <template #editor="{data}">
                         <InputText v-model="data.products.name" autofocus />
                     </template>
                 </Column>
-                <Column field="prescription" header="Cantidad"></Column>
-                <Column field="products.price" header="Precio" dataType="numeric">
-                    <template #editor="{data}">
-                    <!-- {{ data.products.price[field] }} -->
+                <Column field="prescription">
+                    <template #header>
+                        <span class="flex justify-center">Cantidad</span>
+                    </template>
+                    <template #body="slotProps">
+                        <span class="flex justify-center">{{ slotProps.data.prescription }}</span>
+                    </template>
+                </Column>
+                <Column field="products.price" dataType="numeric">
+                    <template #header>
+                        <span class="text-right w-full block">Precio</span>
+                    </template>
+                    <template #body="slotProps">
+                        <span class="text-right w-full block font-medium">{{ formatCurrency(slotProps.data.products.price) }}</span>
+                    </template>
+                    <template #editor="{data}" class="flex justify-end font-medium">
+                        <!-- {{ data.products.price[field] }} -->
                         <InputText v-model="data.products.price" autofocus />
                     </template>
                 </Column>
-                <Column header="Total">
+                <Column>
+                    <template #header>
+                        <span class="text-right w-full block">Total</span>
+                    </template>
                     <template #body="{data}">
-                        <span>{{ formatCurrency(data.products.price*data.prescription) }}</span>
+                        <span class="text-right w-full block font-bold italic">{{ formatCurrency(data.products.price*data.prescription) }}</span>
                     </template>
                 </Column>
                 <Column :rowEditor="true" style="width:10%; min-width:8rem" bodyStyle="text-align:center"></Column>

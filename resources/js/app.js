@@ -35,6 +35,10 @@ import Message from 'primevue/message';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import FileUpload from 'primevue/fileupload';
+import ConfirmationService from 'primevue/confirmationservice';
+import ConfirmPopup from 'primevue/confirmpopup';
+
+
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Asispharma';
 const emitter = mitt();
@@ -66,10 +70,12 @@ createInertiaApp({
             .component('Message', Message)
             .component('TabView', TabView)
             .component('TabPanel', TabPanel)
+            .component('ConfirmPopup', ConfirmPopup)
             .use(plugin)
             .use(PrimeVue)
             .use(ToastService)
             .use(VueSweetalert2)
+            .use(ConfirmationService)
             .mixin({ methods: { route } })
 
         vueApp.config.globalProperties.emitter = emitter;

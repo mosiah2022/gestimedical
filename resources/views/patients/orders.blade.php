@@ -12,7 +12,7 @@
                 @php
                     $colspan = ($companyId === 1) ? 9 : 8;
                 @endphp
-                
+
                 <th colspan="{{ $colspan }}">RELACIÓN DE PACIENTES {{ strtoupper($company) }}</th>
             </tr>
             <tr>
@@ -63,14 +63,14 @@
                     <td style="background-color:#F0F0F0;"></td>
                     <td style="background-color:#F0F0F0;"><strong>VALOR TOTAL FORMULA:</strong></td>
                     <td style="background-color:#F0F0F0;" data-format="$#,##0_-">
-                    <strong> 
-                        {{ 
+                    <strong>
+                        {{
                             array_reduce(
                                 $order->toArray(),
                                 function ($sum, $patient) {
                                     return (float) ($sum += (float) ($patient['product']['price']*$patient['prescription']));
                                 },
-                            0,) 
+                            0,)
                         }}
                     </strong>
                     </td>
@@ -82,22 +82,20 @@
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
-                        @if ($companyId === 1)
-                            <td style="background-color:#F0F0F0;"></td>
-                        @endif
                         <td style="background-color:#F0F0F0;"></td>
-                        <td style="background-color:#F0F0F0;"><strong>COPAGO {{$patient->order->discount_percent}} % POR PARTE DEL USUARIO:</strong></td>
+                        <td style="background-color:#F0F0F0;"></td>
+                        <td style="background-color:#F0F0F0;"><strong>COPAGO {{$patient->order->discount_percent}} POR PARTE DEL USUARIO:</strong></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td data-format="$#,##0_-" style="background-color:#F0F0F0; color:#FF0000;">
-                        <strong>{{ array_reduce(
-                            $order->toArray(),
-                            function ($sum, $patient) {
-                                $x = (float) ($sum += (float) ($patient['product']['price']*$patient['prescription']));
-                                $x = $patient['order']['discount_percent'] > 0 ? round($x*($patient['order']['discount_percent']/100),2) : $x;
-                                return $x;
-                            },
-                            0,
-                        ) }}</strong>
+                        <strong>
+                        {{ array_reduce(
+                                $order->toArray(),
+                                function ($sum, $patient) {
+                                    return $sum + (float) ($patient['product']['price'] * $patient['prescription']);
+                                },
+                                0,
+                            ) - $patient->order->discount_percent }}
+                        </strong>
                         </td>
                         <td></td>
                     </tr>
@@ -105,22 +103,20 @@
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
-                        @if ($companyId === 1)
-                            <td style="background-color:#F0F0F0;"></td>
-                        @endif
+                        <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"><strong>VALOR TOTAL FORMULA:</strong></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;" data-format="$#,##0_-">
-                        <strong> {{ array_reduce(
-                            $order->toArray(),
-                            function ($sum, $patient) {
-                                $x = (float) ($sum += (float) ($patient['product']['price']*$patient['prescription']));
-                                $x = $patient['order']['discount_percent'] > 0 ? round($x-($x*($patient['order']['discount_percent']/100)),2) : $x;
-                                return $x;
-                            },
-                            0,
-                        ) }}</strong>
+                        <strong>
+                            {{ array_reduce(
+                                $order->toArray(),
+                                function ($sum, $patient) {
+                                    return $sum + (float) ($patient['product']['price'] * $patient['prescription']);
+                                },
+                                0,
+                            ) - $patient->order->discount_percent }}
+                        </strong>
                         </td>
                         <td></td>
                     </tr>
@@ -139,19 +135,7 @@
             <td></td>
             <td><strong>VALOR TOTAL FACTURA:</strong></td>
             <td data-format="$#,##0_-"><strong>
-                {{ $orders->map(function($order) {
-                    return array_reduce(
-                        $order->toArray(),
-                        function ($sum, $patient) {
-                            $x = (float) ($sum += (float) $patient['product']['price']*$patient['prescription']);
-                            $x = $patient['order']['discount_percent'] > 0 ? round($x-($x*($patient['order']['discount_percent']/100)),2) : $x;
-                            return $x;
-                        },
-                        0,
-                    );
-                })->reduce(function($a, $b){
-                    return $a+$b;
-                }) }}
+                {{ $globalDiscount > 0 ? $total-$globalDiscount: $total }}
                 </strong>
             </td>
 
