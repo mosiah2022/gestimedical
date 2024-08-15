@@ -98,7 +98,8 @@
         <ConfirmPopup></ConfirmPopup>
 
         <h2 v-if="uploadedFiles" class="font-bold text-lg text-blue-800 mt-4">Archivos adjuntos a la orden</h2>
-        <DataTable :value="uploadedFiles" tableStyle="min-width: 50rem" dataKey="id">
+        <DataTable :value="uploadedFiles" tableStyle="min-width: 50rem" dataKey="id" selectionMode="multiple" v-model:selection="selectedFiles">
+            <Column selectionMode="multiple" style="width: 3rem"></Column>
             <Column field="name" class="lowercase">
                 <template #header>
                     <span class="capitalize">Nombre</span>
@@ -118,6 +119,10 @@
                 </template>
             </Column>
         </DataTable>
+
+        <div class="mt-4">
+            <PrimeButton label="Enviar Archivos" @click="sendFiles" :disabled="selectedFiles.length === 0"></PrimeButton>
+        </div>
 
         <div class="field flex justify-end mt-4">
             <PrimeButton icon="pi pi-save" label="Guardar" class="sm:-bottom-1.5" @click="submitLm($props.editId)" />
@@ -196,7 +201,8 @@ export default {
             pdfFile: null,
             filename: null,
             files: [],
-            uploadedFiles: null
+            uploadedFiles: [],
+            selectedFiles: [],
         }
     },
     props: {
@@ -204,6 +210,17 @@ export default {
         patient_id: Number
     },
     methods: {
+        sendFiles() {
+            axios.post('/api/send-files', {
+                files: this.selectedFiles.map(file => file.id),
+            })
+            .then(response => {
+                this.$toast.add({severity:'success', summary: 'Éxito', detail: 'Archivos enviados correctamente'});
+            })
+            .catch(error => {
+                this.$toast.add({severity:'error', summary: 'Error', detail: 'Hubo un error al enviar los archivos'});
+            });
+        },
         checkFile(id) {
             console.log(id)
         },

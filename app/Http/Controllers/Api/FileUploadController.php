@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Jobs\UploadFileJob;
 use App\Models\Photo;
+use App\Jobs\UploadFileJob;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class FileUploadController extends Controller
@@ -22,6 +23,60 @@ class FileUploadController extends Controller
         });
 
         return response()->json(['files' => $files]);
+    }
+
+    public function sendFilesByEmail(Request $request)
+    {
+        $files = $request->input('files');
+        $attachments = [];
+
+        foreach ($files as $fileId) {
+            $photo = Photo::find($fileId);
+
+            // Generar URL temporal para descargar el archivo
+            $temporaryUrl = Storage::disk('gcs')->temporaryUrl($photo->uri, now()->addMinutes(15));
+
+            $contextOptions = [
+                "ssl" => [
+                    "verify_peer" => false,
+                    "verify_peer_name" => false,
+                ],
+            ];
+
+            $context = stream_context_create($contextOptions);
+            $contents = file_get_contents($temporaryUrl, false, $context);
+
+            // Descargar el archivo temporalmente
+            //$contents = file_get_contents($temporaryUrl);
+
+            // Guardar el archivo temporalmente
+            $tempPath = storage_path('app/temp/' . $photo->name);
+
+            if (!file_exists(dirname($tempPath))) {
+                mkdir(dirname($tempPath), 0755, true);
+            }
+            file_put_contents($tempPath, $contents);
+
+            // Añadir el archivo al array de adjuntos
+            $attachments[] = $tempPath;
+        }
+
+        $email="mosiahazuaje2010@gmail.com";
+        // Enviar el correo con los archivos adjuntos
+        Mail::send('emails.file_send', [], function($message) use ($email, $attachments) {
+            $message->to($email)->subject('Archivos Adjuntos');
+
+            foreach ($attachments as $attachment) {
+                $message->attach($attachment);
+            }
+        });
+
+        // Borrar los archivos temporales después de enviar el correo
+        foreach ($attachments as $attachment) {
+            unlink($attachment);
+        }
+
+        return response()->json(['message' => 'Archivos enviados correctamente.']);
     }
 
     public function fileStore(Request $request) {
@@ -50,13 +105,13 @@ class FileUploadController extends Controller
             }
             return response()->json(['message' => 'Files uploaded successfully'], 200);
         }
-        
-        return response()->json(['message' => 'Error on upload file'], 400); 
+
+        return response()->json(['message' => 'Error on upload file'], 400);
     }
 
     public function delete(Request $request)
     {
-        $id        = $request->input('id'); 
+        $id        = $request->input('id');
         $patientId = $request->input('patient_id');
         $fileName  = $request->input('name');
         $filePath  = 'documents/'.$patientId. '/'. $fileName;

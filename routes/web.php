@@ -104,6 +104,9 @@ Route::group(['middleware' => 'auth', 'prefix' => 'api'], function () {
 
     //Delete post on cloud
     Route::post('delete_file', [FileUploadController::class, 'delete']);
+
+    //Email Methods
+    Route::post('send-files', [FileUploadController::class, 'sendFilesByEmail']);
 });
 
 require __DIR__.'/auth.php';
