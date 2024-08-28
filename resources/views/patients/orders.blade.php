@@ -84,17 +84,11 @@
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
-                        <td style="background-color:#F0F0F0;"><strong>COPAGO {{$patient->order->discount_percent}} POR PARTE DEL USUARIO:</strong></td>
+                        <td style="background-color:#F0F0F0;"><strong>COPAGO POR PARTE DEL USUARIO:</strong></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td data-format="$#,##0_-" style="background-color:#F0F0F0; color:#FF0000;">
                         <strong>
-                        {{ array_reduce(
-                                $order->toArray(),
-                                function ($sum, $patient) {
-                                    return $sum + (float) ($patient['price_detail'] * $patient['prescription']);
-                                },
-                                0,
-                            ) - $patient->order->discount_percent }}
+                            {{$patient->order->discount_percent}}
                         </strong>
                         </td>
                         <td></td>

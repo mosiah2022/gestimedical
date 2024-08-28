@@ -21831,7 +21831,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         product_id: null,
         order_id: null,
         patient_id: null,
-        prescription: null
+        prescription: null,
+        price_detail: null
       },
       displayCreateProduct: false,
       editId: null,
@@ -21985,21 +21986,43 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           }
         }, _callee4);
       }))();
+    },
+    handleChange: function handleChange(event) {
+      var _this6 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
+        var product_id;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                product_id = event.value;
+                axios__WEBPACK_IMPORTED_MODULE_3___default().get("/api/products/".concat(product_id)).then(function (res) {
+                  _this6.formprod.price_detail = res.data.price;
+                });
+
+              case 2:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5);
+      }))();
     }
   },
   mounted: function mounted() {
-    var _this6 = this;
+    var _this7 = this;
 
     this.getMedicines();
     this.formprod.order_id = this.$props.order_id;
     this.formprod.patient_id = this.$props.patient_id;
     this.getDetailLms(this.formprod.order_id);
     this.emitter.on('products_reload', function () {
-      _this6.getMedicines();
+      _this7.getMedicines();
 
-      _this6.displayCreateProduct = false;
+      _this7.displayCreateProduct = false;
 
-      _this6.$toast.add({
+      _this7.$toast.add({
         severity: 'success',
         summary: 'SUCCESS!',
         detail: "Medicamento creado con exito!",
@@ -22007,9 +22030,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       });
     });
     this.emitter.on('patient_lm_detail_reload', function () {
-      _this6.getDetailLms(_this6.formprod.order_id);
+      _this7.getDetailLms(_this7.formprod.order_id);
 
-      _this6.$toast.add({
+      _this7.$toast.add({
         severity: 'success',
         summary: 'SUCCESS!',
         detail: "Item agregado exitosamente",
@@ -22017,9 +22040,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       });
     });
     this.emitter.on('patient_lm_destroy_reload', function () {
-      _this6.getDetailLms(_this6.formprod.order_id);
+      _this7.getDetailLms(_this7.formprod.order_id);
 
-      _this6.$toast.add({
+      _this7.$toast.add({
         severity: 'success',
         summary: 'SUCCESS!',
         detail: "Item eliminado",
@@ -22116,7 +22139,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       pdfFile: null,
       filename: null,
       files: [],
-      uploadedFiles: null
+      uploadedFiles: [],
+      selectedFiles: []
     };
   },
   props: {
@@ -22124,11 +22148,32 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     patient_id: Number
   },
   methods: {
+    sendFiles: function sendFiles() {
+      var _this = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/send-files', {
+        files: this.selectedFiles.map(function (file) {
+          return file.id;
+        })
+      }).then(function (response) {
+        _this.$toast.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Archivos enviados correctamente'
+        });
+      })["catch"](function (error) {
+        _this.$toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Hubo un error al enviar los archivos'
+        });
+      });
+    },
     checkFile: function checkFile(id) {
       console.log(id);
     },
     removeFile: function removeFile(event, id, fileName) {
-      var _this = this;
+      var _this2 = this;
 
       this.$confirm.require({
         target: event.currentTarget,
@@ -22147,14 +22192,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/delete_file', {
             id: id,
             name: fileName,
-            patient_id: _this.patient_id
+            patient_id: _this2.patient_id
           }).then(function (response) {
-            _this.uploadedFiles = _this.uploadedFiles.filter(function (file) {
+            _this2.uploadedFiles = _this2.uploadedFiles.filter(function (file) {
               return file.id !== id;
             });
           });
 
-          _this.$toast.add({
+          _this2.$toast.add({
             severity: 'info',
             summary: 'Confirmed',
             detail: 'Archivo eliminado',
@@ -22162,7 +22207,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           });
         },
         reject: function reject() {
-          _this.$toast.add({
+          _this2.$toast.add({
             severity: 'error',
             summary: 'Rejected',
             detail: 'No se logro eliminar el registro',
@@ -22172,7 +22217,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       });
     },
     uploadFiles: function uploadFiles(event) {
-      var _this2 = this;
+      var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
         var currentObj, config, formData, i;
@@ -22180,14 +22225,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _this2.files = event.files;
+                _this3.files = event.files;
 
-                if (!(_this2.files && _this2.files.length > 0)) {
+                if (!(_this3.files && _this3.files.length > 0)) {
                   _context.next = 11;
                   break;
                 }
 
-                currentObj = _this2;
+                currentObj = _this3;
                 config = {
                   headers: {
                     'content-type': 'multipart/form-data',
@@ -22196,11 +22241,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 };
                 formData = new FormData();
 
-                for (i = 0; i < _this2.files.length; i++) {
-                  formData.append('files[]', _this2.files[i]);
+                for (i = 0; i < _this3.files.length; i++) {
+                  formData.append('files[]', _this3.files[i]);
                 }
 
-                formData.append('patient_id', _this2.$props.patient_id);
+                formData.append('patient_id', _this3.$props.patient_id);
                 axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/store_file', formData, config).then(function (response) {
                   currentObj.success = response.data.success;
                   currentObj.filename = "";
@@ -22209,9 +22254,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 })["catch"](function (error) {
                   currentObj.output = error;
                 });
-                _this2.filename = "";
-                _this2.files = [];
-                return _context.abrupt("return", _this2.emitter.emit('photo_reload'));
+                _this3.filename = "";
+                _this3.files = [];
+                return _context.abrupt("return", _this3.emitter.emit('photo_reload'));
 
               case 11:
               case "end":
@@ -22222,7 +22267,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     getListFiles: function getListFiles() {
-      var _this3 = this;
+      var _this4 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
@@ -22230,8 +22275,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/list_files/".concat(_this3.patient_id)).then(function (response) {
-                  _this3.uploadedFiles = response.data.files;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/list_files/".concat(_this4.patient_id)).then(function (response) {
+                  _this4.uploadedFiles = response.data.files;
                 })["catch"](function (error) {
                   console.error('Error fetching files:', error);
                 });
@@ -22245,28 +22290,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     getOrder: function getOrder() {
-      var _this4 = this;
+      var _this5 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                _this4.animation_wait = true;
+                _this5.animation_wait = true;
                 _context3.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/patient_lms/".concat(_this4.edit_id)).then(function (res) {
-                  _this4.order = res.data;
-                  _this4.orders = res.data.orders;
-                  _this4.form = _this4.order; //Initiate methods
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/patient_lms/".concat(_this5.edit_id)).then(function (res) {
+                  _this5.order = res.data;
+                  _this5.orders = res.data.orders;
+                  _this5.form = _this5.order; //Initiate methods
 
                   //Initiate methods
-                  _this4.getPhones(_this4.order.patient_id, 'phone');
+                  _this5.getPhones(_this5.order.patient_id, 'phone');
 
-                  _this4.getDiagnostics(_this4.order.patient_id);
+                  _this5.getDiagnostics(_this5.order.patient_id);
 
-                  _this4.getAddress(_this4.order.patient_id, 'address');
+                  _this5.getAddress(_this5.order.patient_id, 'address');
 
-                  _this4.getPatient(_this4.order.patient_id);
+                  _this5.getPatient(_this5.order.patient_id);
                 });
 
               case 3:
@@ -22278,7 +22323,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     getPatient: function getPatient(id) {
-      var _this5 = this;
+      var _this6 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
@@ -22287,8 +22332,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context4.next = 2;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/patients/".concat(id)).then(function (res) {
-                  _this5.patient = res.data;
-                  _this5.animation_wait = false;
+                  _this6.patient = res.data;
+                  _this6.animation_wait = false;
                 });
 
               case 2:
@@ -22300,7 +22345,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     getPhones: function getPhones(id, category) {
-      var _this6 = this;
+      var _this7 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
@@ -22309,7 +22354,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context5.next = 2;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/address_patient/".concat(id, "/").concat(category)).then(function (res) {
-                  _this6.phones = res.data;
+                  _this7.phones = res.data;
                 });
 
               case 2:
@@ -22324,7 +22369,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.displayCreatePhone = true;
     },
     getDiagnostics: function getDiagnostics(id) {
-      var _this7 = this;
+      var _this8 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
@@ -22333,7 +22378,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context6.next = 2;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/diagnostic_patient/".concat(id)).then(function (res) {
-                  _this7.diagnostics = res.data;
+                  _this8.diagnostics = res.data;
                 });
 
               case 2:
@@ -22348,7 +22393,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.displayCreateDiagnostic = true;
     },
     getAddress: function getAddress(id, category) {
-      var _this8 = this;
+      var _this9 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee7() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee7$(_context7) {
@@ -22357,7 +22402,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context7.next = 2;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().get("api/address_patient/".concat(id, "/").concat(category)).then(function (res) {
-                  _this8.addreses = res.data;
+                  _this9.addreses = res.data;
                 });
 
               case 2:
@@ -22372,7 +22417,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.displayCreateAddress = true;
     },
     getProducts: function getProducts() {
-      var _this9 = this;
+      var _this10 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee8() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee8$(_context8) {
@@ -22381,7 +22426,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context8.next = 2;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().get('api/products').then(function (res) {
-                  _this9.products = res.data;
+                  _this10.products = res.data;
                 });
 
               case 2:
@@ -22393,14 +22438,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     setDiagnostic: function setDiagnostic() {
-      var _this10 = this;
+      var _this11 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee9() {
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
               case 0:
-                _this10.diagnostic_idold = _this10.form.diagnostic_id;
+                _this11.diagnostic_idold = _this11.form.diagnostic_id;
 
               case 1:
               case "end":
@@ -22411,7 +22456,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     submitLm: function submitLm(order) {
-      var _this11 = this;
+      var _this12 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee10() {
         var err;
@@ -22421,10 +22466,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context10.prev = 0;
                 _context10.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().put("/api/patient_lms/".concat(order), _this11.form);
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().put("/api/patient_lms/".concat(order), _this12.form);
 
               case 3:
-                return _context10.abrupt("return", _this11.emitter.emit('patientLm_reload'));
+                return _context10.abrupt("return", _this12.emitter.emit('patientLm_reload'));
 
               case 6:
                 _context10.prev = 6;
@@ -22434,7 +22479,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   switch (_context10.t0.response.status) {
                     case 422:
                       err = _context10.t0.response.data.errors;
-                      _this11.error_lm_code = err.lm_code ? err.lm_code[0] : null;
+                      _this12.error_lm_code = err.lm_code ? err.lm_code[0] : null;
                   }
                 }
 
@@ -22448,14 +22493,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     }
   },
   mounted: function mounted() {
-    var _this12 = this;
+    var _this13 = this;
 
     this.edit_id = this.$props.editId;
     this.getOrder();
     this.getProducts();
     this.getListFiles();
     this.emitter.on('photo_reload', function () {
-      _this12.$toast.add({
+      _this13.$toast.add({
         severity: 'success',
         summary: 'SUCCESS',
         detail: 'Se a actualizado la información de la orden correctamente',
@@ -27525,10 +27570,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     optionValue: "id",
     filter: true,
     filterPlaceholder: "Buscar medicamento",
-    showClear: true
+    showClear: true,
+    onChange: $options.handleChange
   }, null, 8
   /* PROPS */
-  , ["modelValue", "options"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputNumber, {
+  , ["modelValue", "options", "onChange"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputNumber, {
     modelValue: $data.formprod.prescription,
     "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
       return $data.formprod.prescription = $event;
@@ -27886,6 +27932,9 @@ var _hoisted_41 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 
 var _hoisted_42 = [_hoisted_41];
 var _hoisted_43 = {
+  "class": "mt-4"
+};
+var _hoisted_44 = {
   "class": "field flex justify-end mt-4"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -28085,10 +28134,20 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ConfirmPopup), $data.uploadedFiles ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h2", _hoisted_34, "Archivos adjuntos a la orden")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DataTable, {
     value: $data.uploadedFiles,
     tableStyle: "min-width: 50rem",
-    dataKey: "id"
+    dataKey: "id",
+    selectionMode: "multiple",
+    selection: $data.selectedFiles,
+    "onUpdate:selection": _cache[16] || (_cache[16] = function ($event) {
+      return $data.selectedFiles = $event;
+    })
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
       return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
+        selectionMode: "multiple",
+        style: {
+          "width": "3rem"
+        }
+      }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
         field: "name",
         "class": "lowercase"
       }, {
@@ -28135,11 +28194,17 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   }, 8
   /* PROPS */
-  , ["value"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
+  , ["value", "selection"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_43, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
+    label: "Enviar Archivos",
+    onClick: $options.sendFiles,
+    disabled: $data.selectedFiles.length === 0
+  }, null, 8
+  /* PROPS */
+  , ["onClick", "disabled"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_44, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
     icon: "pi pi-save",
     label: "Guardar",
     "class": "sm:-bottom-1.5",
-    onClick: _cache[16] || (_cache[16] = function ($event) {
+    onClick: _cache[17] || (_cache[17] = function ($event) {
       return $options.submitLm(_ctx.$props.editId);
     })
   })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Dialog, {
@@ -28148,7 +28213,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       width: '25vw'
     },
     visible: $data.displayCreatePhone,
-    "onUpdate:visible": _cache[17] || (_cache[17] = function ($event) {
+    "onUpdate:visible": _cache[18] || (_cache[18] = function ($event) {
       return $data.displayCreatePhone = $event;
     }),
     maximizable: false
@@ -28171,7 +28236,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       width: '25vw'
     },
     visible: $data.displayCreateAddress,
-    "onUpdate:visible": _cache[18] || (_cache[18] = function ($event) {
+    "onUpdate:visible": _cache[19] || (_cache[19] = function ($event) {
       return $data.displayCreateAddress = $event;
     }),
     maximizable: false
@@ -28194,7 +28259,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       width: '25vw'
     },
     visible: $data.displayCreateDiagnostic,
-    "onUpdate:visible": _cache[19] || (_cache[19] = function ($event) {
+    "onUpdate:visible": _cache[20] || (_cache[20] = function ($event) {
       return $data.displayCreateDiagnostic = $event;
     }),
     maximizable: false
