@@ -84,6 +84,7 @@
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
+                        <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"><strong>COPAGO POR PARTE DEL USUARIO:</strong></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td data-format="$#,##0_-" style="background-color:#F0F0F0; color:#FF0000;">
@@ -94,6 +95,7 @@
                         <td></td>
                     </tr>
                     <tr>
+                        <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
                         <td style="background-color:#F0F0F0;"></td>
