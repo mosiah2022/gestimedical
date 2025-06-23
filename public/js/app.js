@@ -20391,6 +20391,9 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         name: 'Seguros Alfa',
         id: '2'
+      }, {
+        name: 'Seguros Aurora',
+        id: '3'
       }]
     };
   },

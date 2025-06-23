@@ -78,6 +78,7 @@ export default {
             companies: [
                 { name: 'Seguros Bolivar', id: '1' },
                 { name: 'Seguros Alfa', id: '2' },
+                { name: 'Seguros Aurora', id: '3' },
             ]
         }
     },
