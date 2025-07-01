@@ -23354,7 +23354,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         last_name: null,
         personal_id: null,
         age: null,
-        city_id: null
+        city_id: null,
+        type_document: null,
+        sex: null,
+        birthday: null,
+        born_city_id: null,
+        address: null,
+        phone: null,
+        email: null,
+        type_user: null,
+        disability: null
       },
       cities: [],
       error_first_name: null,
@@ -23362,7 +23371,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       error_personal_id: null,
       error_age: null,
       error_city_id: null,
-      next_view: true
+      next_view: true,
+      documentTypes: ['OTRO', 'CONSUMIDOR FINAL', 'REGISTRO CIVIL', 'TI', 'CC', 'TE', 'Cédula de extranjería', 'NIT', 'PASAPORTE', 'Documento de identidad', 'Sin identificación', 'Permiso especial', 'NUIP'],
+      sexOptions: ['male', 'female'],
+      userTypes: ['Contributivo cotizante', 'Contributivo beneficiario', 'Contributivo adicional', 'Subsidiado', 'Sin régimen', 'Especiales o de Excepción cotizante', 'Especiales o de Excepción beneficiario', 'Particular', 'Tomador/Amparo ARL', 'Tomador/Amparo SOAT', 'Tomador/Amparo Planes voluntarios de salud'],
+      disabilityOptions: ['Si', 'NO']
     };
   },
   props: {
@@ -23397,6 +23410,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         return _this2.form[index] = null;
       });
     },
+    formatDate: function formatDate(date) {
+      if (!date) return null;
+      var d = new Date(date);
+      var year = d.getFullYear();
+      var month = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      return "".concat(year, "-").concat(month, "-").concat(day);
+    },
     submit: function submit() {
       var _this3 = this;
 
@@ -23408,26 +23429,27 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context2.prev = _context2.next) {
               case 0:
                 _this3.next_view = false;
+                _this3.form.birthday = _this3.formatDate(_this3.form.birthday);
 
                 if (_this3.$props.editId) {
-                  _context2.next = 14;
+                  _context2.next = 15;
                   break;
                 }
 
-                _context2.prev = 2;
-                _context2.next = 5;
+                _context2.prev = 3;
+                _context2.next = 6;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/patients', _this3.form);
 
-              case 5:
+              case 6:
                 res = _context2.sent;
 
                 _this3.cleanForm();
 
                 return _context2.abrupt("return", _this3.emitter.emit('patients_reload', res.data));
 
-              case 10:
-                _context2.prev = 10;
-                _context2.t0 = _context2["catch"](2);
+              case 11:
+                _context2.prev = 11;
+                _context2.t0 = _context2["catch"](3);
 
                 if (_context2.t0.response) {
                   _this3.next_view = true;
@@ -23445,19 +23467,19 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 return _context2.abrupt("return", null);
 
-              case 14:
-                _context2.prev = 14;
+              case 15:
+                _context2.prev = 15;
                 _this3.next_view = true;
-                _context2.next = 18;
+                _context2.next = 19;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().put("/api/patients/".concat(_this3.$props.editId), _this3.form);
 
-              case 18:
+              case 19:
                 _res = _context2.sent;
                 return _context2.abrupt("return", _this3.emitter.emit('patient_update_reload'));
 
-              case 22:
-                _context2.prev = 22;
-                _context2.t1 = _context2["catch"](14);
+              case 23:
+                _context2.prev = 23;
+                _context2.t1 = _context2["catch"](15);
 
                 if (_context2.t1.response) {
                   switch (_context2.t1.response.status) {
@@ -23473,12 +23495,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 return _context2.abrupt("return", null);
 
-              case 26:
+              case 27:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[2, 10], [14, 22]]);
+        }, _callee2, null, [[3, 11], [15, 23]]);
       }))();
     },
     getEditData: function getEditData() {
@@ -23500,8 +23522,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 _this4.form.personal_id = res.data.personal_id;
                 _this4.form.age = res.data.age;
                 _this4.form.city_id = res.data.city_id;
+                _this4.form.type_document = res.data.type_document;
+                _this4.form.sex = res.data.sex;
+                _this4.form.birthday = res.data.birthday;
+                _this4.form.born_city_id = res.data.born_city_id;
+                _this4.form.address = res.data.address;
+                _this4.form.phone = res.data.phone;
+                _this4.form.email = res.data.email;
+                _this4.form.type_user = res.data.type_user;
+                _this4.form.disability = res.data.disability;
 
-              case 8:
+              case 17:
               case "end":
                 return _context3.stop();
             }
@@ -29103,25 +29134,106 @@ var _hoisted_12 = {
   "class": "field col"
 };
 
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Identificacion", -1
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Tipo de documento", -1
 /* HOISTED */
 );
 
 var _hoisted_14 = {
-  "class": "text-red-500"
-};
-var _hoisted_15 = {
   "class": "field col"
 };
 
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Edad", -1
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Sexo", -1
 /* HOISTED */
 );
 
-var _hoisted_17 = {
+var _hoisted_16 = {
+  "class": "field col"
+};
+
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Fecha de nacimiento", -1
+/* HOISTED */
+);
+
+var _hoisted_18 = {
+  "class": "formgrid grid"
+};
+var _hoisted_19 = {
+  "class": "field col"
+};
+
+var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Ciudad de nacimiento", -1
+/* HOISTED */
+);
+
+var _hoisted_21 = {
+  "class": "field col"
+};
+
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Dirección", -1
+/* HOISTED */
+);
+
+var _hoisted_23 = {
+  "class": "field col"
+};
+
+var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Teléfono", -1
+/* HOISTED */
+);
+
+var _hoisted_25 = {
+  "class": "formgrid grid"
+};
+var _hoisted_26 = {
+  "class": "field col"
+};
+
+var _hoisted_27 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Email", -1
+/* HOISTED */
+);
+
+var _hoisted_28 = {
+  "class": "field col"
+};
+
+var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Tipo de Usuario", -1
+/* HOISTED */
+);
+
+var _hoisted_30 = {
+  "class": "field col"
+};
+
+var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "¿Incapacidad?", -1
+/* HOISTED */
+);
+
+var _hoisted_32 = {
+  "class": "formgrid grid"
+};
+var _hoisted_33 = {
+  "class": "field col"
+};
+
+var _hoisted_34 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Identificacion", -1
+/* HOISTED */
+);
+
+var _hoisted_35 = {
   "class": "text-red-500"
 };
-var _hoisted_18 = {
+var _hoisted_36 = {
+  "class": "field col"
+};
+
+var _hoisted_37 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Edad", -1
+/* HOISTED */
+);
+
+var _hoisted_38 = {
+  "class": "text-red-500"
+};
+var _hoisted_39 = {
   key: 0,
   "class": "field col mt-4"
 };
@@ -29129,6 +29241,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Dropdown = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Dropdown");
 
   var _component_InputText = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("InputText");
+
+  var _component_Calendar = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Calendar");
 
   var _component_InputNumber = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("InputNumber");
 
@@ -29169,27 +29283,119 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* PROPS */
   , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("small", _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.error_last_name), 1
   /* TEXT */
-  )])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
-    modelValue: $data.form.personal_id,
+  )])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Tipo de documento "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Dropdown, {
+    modelValue: $data.form.type_document,
     "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
+      return $data.form.type_document = $event;
+    }),
+    options: $data.documentTypes,
+    "class": "w-full",
+    placeholder: "Seleccione tipo"
+  }, null, 8
+  /* PROPS */
+  , ["modelValue", "options"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Sexo "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Dropdown, {
+    modelValue: $data.form.sex,
+    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+      return $data.form.sex = $event;
+    }),
+    options: $data.sexOptions,
+    "class": "w-full",
+    placeholder: "Seleccione sexo"
+  }, null, 8
+  /* PROPS */
+  , ["modelValue", "options"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Fecha de nacimiento "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [_hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Calendar, {
+    modelValue: $data.form.birthday,
+    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
+      return $data.form.birthday = $event;
+    }),
+    "class": "w-full",
+    dateFormat: "yy-mm-dd",
+    showIcon: "",
+    showButtonBar: "",
+    view: "date",
+    monthNavigator: "",
+    yearNavigator: "",
+    yearRange: "1900:2050"
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Ciudad de nacimiento "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Dropdown, {
+    "class": "w-full",
+    modelValue: $data.form.born_city_id,
+    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
+      return $data.form.born_city_id = $event;
+    }),
+    options: $data.cities,
+    optionLabel: "city",
+    optionValue: "id",
+    placeholder: "Seleccione ciudad",
+    filter: true
+  }, null, 8
+  /* PROPS */
+  , ["modelValue", "options"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Dirección "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
+    modelValue: $data.form.address,
+    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
+      return $data.form.address = $event;
+    }),
+    "class": "w-full"
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Teléfono "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
+    modelValue: $data.form.phone,
+    "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
+      return $data.form.phone = $event;
+    }),
+    "class": "w-full"
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Email "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [_hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
+    modelValue: $data.form.email,
+    "onUpdate:modelValue": _cache[9] || (_cache[9] = function ($event) {
+      return $data.form.email = $event;
+    }),
+    "class": "w-full"
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Tipo de usuario "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_28, [_hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Dropdown, {
+    modelValue: $data.form.type_user,
+    "onUpdate:modelValue": _cache[10] || (_cache[10] = function ($event) {
+      return $data.form.type_user = $event;
+    }),
+    options: $data.userTypes,
+    "class": "w-full",
+    placeholder: "Seleccione tipo"
+  }, null, 8
+  /* PROPS */
+  , ["modelValue", "options"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Incapacidad "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_30, [_hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Dropdown, {
+    modelValue: $data.form.disability,
+    "onUpdate:modelValue": _cache[11] || (_cache[11] = function ($event) {
+      return $data.form.disability = $event;
+    }),
+    options: $data.disabilityOptions,
+    "class": "w-full",
+    placeholder: "Seleccione"
+  }, null, 8
+  /* PROPS */
+  , ["modelValue", "options"])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [_hoisted_34, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
+    modelValue: $data.form.personal_id,
+    "onUpdate:modelValue": _cache[12] || (_cache[12] = function ($event) {
       return $data.form.personal_id = $event;
     }),
     "class": "w-full"
   }, null, 8
   /* PROPS */
-  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("small", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.error_personal_id), 1
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("small", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.error_personal_id), 1
   /* TEXT */
-  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputNumber, {
+  )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_36, [_hoisted_37, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputNumber, {
     modelValue: $data.form.age,
-    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+    "onUpdate:modelValue": _cache[13] || (_cache[13] = function ($event) {
       return $data.form.age = $event;
     }),
     "class": "w-full"
   }, null, 8
   /* PROPS */
-  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("small", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.error_age), 1
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("small", _hoisted_38, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.error_age), 1
   /* TEXT */
-  )]), $data.next_view === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
+  )]), $data.next_view === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_39, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
     icon: "pi pi-save",
     label: $props.editId === null ? 'Siguiente' : 'Guardar',
     "class": "sm:-bottom-1.5",
