@@ -10,15 +10,8 @@ class Patient extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'company_id',
-        'first_name',
-        'last_name',
-        'personal_id',
-        'age',
-        'city_id'
-    ];
-
+    protected $guarded = ['id'];
+    
     //Relationship
     public function city() {
         return $this->belongsTo(City::class);
