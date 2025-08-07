@@ -27,7 +27,6 @@
         <div>
             <span class="justify-center" v-if="animation_wait === true">Espere un momento por favor <ProgressSpinner /></span>
             <DataTable
-                stripedRows
                 :filters="filter"
                 :value="details"
                 dataKey="id"
@@ -37,6 +36,7 @@
                 @row-edit-save="onRowEditSave"
                 :paginate="true" :rows="20"
                 class="editable-cells-table"
+                :rowClass="rowClass"
             >
                 <Column field="products.name" header="Medicamento">
                     <template #editor="{data}">
@@ -163,6 +163,12 @@ import axios from "axios";
             async getDetailLms(id) {
                 await axios.get(`api/showlmdetail/${id}`).then((res) => {
                     this.details = res.data;
+
+                    console.log(this.details.map(d => ({
+                        name: d.products?.name,
+                        exists: d.products?.exists_in_metadata
+                    })));
+
                     this.animation_wait = false
                 })
             },
@@ -189,6 +195,10 @@ import axios from "axios";
                 axios.get(`/api/products/${product_id}`).then((res) => {
                     this.formprod.price_detail = res.data.price
                 })
+            },
+            rowClass(data) {
+                const exists = data.products?.exists_in_metadata;
+                return exists ? 'row-green' : 'row-red';
             }
         },
         mounted(){
@@ -223,3 +233,13 @@ import axios from "axios";
 
     }
 </script>
+
+<style>
+.row-green {
+    background-color: #e0f9e0 !important; /* Verde suave */
+}
+
+.row-red {
+    background-color: #ffe0e0 !important; /* Rojo suave */
+}
+</style>

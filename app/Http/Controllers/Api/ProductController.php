@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use App\Models\Product;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\ProductMetadata;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ProductCollection;
 
+use App\Models\CompanyProductMetadata;
+use App\Http\Resources\ProductCollection;
 use App\Http\Resources\Product as ProductResource;
 use App\Http\Requests\Products\Product as ProductRequest;
 use App\Http\Requests\Products\ProductUpdate as ProductUpdateRequest;
@@ -32,20 +34,20 @@ class ProductController extends Controller
         $perPage = $request->input('perPage', 10);
         $currentPage = $request->input('page', 1);
         $globalFilter = $request->input('filters', '');
-    
+
         $query = Product::where('company_id', $companyId);
-    
+
         if ($globalFilter) {
             $query->where(function ($q) use ($globalFilter) {
                 $q->where('name', 'like', '%' . $globalFilter . '%');
             });
         }
-    
+
         $totalRecords = $query->count();
-    
+
         $products = $query->orderBy('name', 'asc')->paginate($perPage, ['*'], 'page', $currentPage);
         $totalPages = ceil($totalRecords / $perPage);
-    
+
         return response()->json([
             'products' => new ProductCollection($products),
             'totalRecords' => $totalRecords,
@@ -75,7 +77,7 @@ class ProductController extends Controller
         $company = intval(session('company'));
         $request->merge(['date_boarding' => Carbon::parse($request->date_boarding)->toDateString()]);
         $request->merge(['company_id' => $company]);
-        
+
         $product = $this->product->create($request->all());
         return response()->json(new ProductResource($product), 201);
     }
@@ -103,6 +105,33 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product): JsonResponse
     {
         $product->update($request->all());
+
+        $companyId = intval(session('company'));
+
+        // Buscar la nueva metadata (si fue enviada)
+        $metadata = ProductMetadata::where('code', $request->input('product_metadata_code'))->first();
+
+        if ($metadata) {
+            // Verificar si ya existe un registro de relación
+            $relation = CompanyProductMetadata::where('product_id', $product->id)
+                ->where('company_id', $companyId)
+                ->first();
+
+            if ($relation) {
+                // Actualizar metadata
+                $relation->update([
+                    'product_metadata_id' => $metadata->id
+                ]);
+            } else {
+                // Crear nueva relación
+                CompanyProductMetadata::create([
+                    'company_id' => $companyId,
+                    'product_id' => $product->id,
+                    'product_metadata_id' => $metadata->id
+                ]);
+            }
+        }
+
         return response()->json(new ProductResource($product));
     }
 

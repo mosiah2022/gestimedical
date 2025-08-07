@@ -18,6 +18,23 @@
                 <small class="text-red-500">{{ error_price }}</small>
             </div>
             <div class="p-field">
+                <label>MetaData</label>
+                <AutoComplete
+                    v-model="selectedMetadata"
+                    :suggestions="filteredMetadata"
+                    :lazy="true"
+                    :loading="loadingMetadata"
+                    field="label"
+                    forceSelection
+                    complete-on-focus
+                    placeholder="Buscar código metadata"
+                    @complete="loadMetadata"
+                    class="w-100"
+                    panelStyle="max-height: 150px; overflow-y: auto;"
+                />
+            </div>
+
+            <div class="p-field">
                 <PrimeButton icon="pi pi-save" label="Guardar" class="sm:-bottom-1.5" @click="submit" />
             </div>
         </div>
@@ -48,13 +65,44 @@ export default {
             error_name: null,
             error_presentation_id: null,
             error_price: null,
-            displayCreatePresentation: false
+            displayCreatePresentation: false,
+            selectedMetadata: null,
+            filteredMetadata: [],
+            loadingMetadata: false,
+            metadataPage: 1,
+            metadataTotal: 0,
+            error_product_metadata_code: null,
         }
     },
     props: {
         editId: Number,
     },
     methods: {
+
+        async loadMetadata(event) {
+            this.loadingMetadata = true;
+            try {
+                const res = await axios.get('/api/product_metadata', {
+                    params: {
+                        search: event.query,
+                        product_id: this.form.id ?? this.$props.editId,
+                        page: 1,
+                        per_page: 100
+                    }
+                });
+
+                this.filteredMetadata = res.data.data.map(item => ({
+                    label: `${item.code} - ${item.name}`,
+                    code: item.code
+                }));
+                this.metadataTotal = res.data.total;
+
+            } catch (error) {
+                console.error('Error cargando metadata', error);
+            }
+            this.loadingMetadata = false;
+        },
+
         async getPresentations () {
             await axios.get('api/presentations').then((res) => {
                 this.presentations = res.data
@@ -106,6 +154,21 @@ export default {
             this.form.name             = res.data.name
             this.form.presentation_id  = res.data.presentation_id
             this.form.price            = parseFloat(res.data.price)
+
+            // 👇 Buscar si ya está en filteredMetadata
+            const found = this.filteredMetadata.find(
+                item => item.code === res.data.product_metadata_code
+            );
+
+            if (found) {
+                this.selectedMetadata = found;
+            } else {
+                // fallback si no está cargado aún
+                this.selectedMetadata = {
+                    code: res.data.product_metadata?.code,
+                    label: `${res.data.product_metadata?.code ?? ''} - ${res.data.product_metadata?.name ?? ''}`
+                }
+            }
         },
         viewCreatePresentation() {
             this.displayCreatePresentation = true;
@@ -125,6 +188,11 @@ export default {
                 detail: `Presentacion cargado`, life:3000,
             })
         });
+    },
+    watch: {
+        selectedMetadata(newVal) {
+            this.form.product_metadata_code = newVal?.code || null;
+        }
     }
 }
 </script>

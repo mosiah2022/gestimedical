@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\ValueExport;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\PatientLmDetail as PatientLmDetailResource;
-use App\Http\Resources\PatientLmDetailCollection;
-use App\Http\Requests\PatientLmDetails\PatientLmDetail as PatientLmDetailRequest;
 use App\Models\PatientLmDetail;
-
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
+
+use App\Http\Resources\PatientLmDetailCollection;
+use App\Http\Resources\PatientLmDetail as PatientLmDetailResource;
+use App\Http\Requests\PatientLmDetails\PatientLmDetail as PatientLmDetailRequest;
 
 class PatientLmDetailController extends Controller
 {
@@ -84,10 +85,12 @@ class PatientLmDetailController extends Controller
         return response()->json(null, 204);
     }
 
-    public function showlmdetail($id) {
-        $getDetail = PatientLmDetail::where([
-            'order_id' => $id
-        ])->get();
+
+    public function showlmdetail($id)
+    {
+        $getDetail = PatientLmDetail::where('order_id', $id)
+            ->with('product') // para que cargue el producto
+            ->get();
 
         return response()->json(
             new PatientLmDetailCollection($getDetail)

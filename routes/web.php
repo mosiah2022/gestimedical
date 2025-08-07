@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\PresentationController;
 use App\Http\Controllers\Api\PatientAddressController;
 use App\Http\Controllers\Api\PatientLmDetailController;
 use App\Http\Controllers\Api\PatientDiagnosticController;
+use App\Http\Controllers\api\ProductMetadataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,6 +86,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'api'], function () {
     Route::get('getPatientsByDate/{dateini}/{dateend}',[PatientController::class, 'getPatientsByDate']);
     Route::get('getMedicines', [ProductController::class, 'getMedicines']);
     Route::get('list_files/{patient_id}', [FileUploadController::class, 'listFiles']);
+    Route::get('product_metadata', [ProductMetadataController::class, 'index']);
 
     //Exports Excel
     Route::get('export_patients/{iniDate}/{endDate}', [PatientController::class, 'export']);
@@ -107,6 +109,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'api'], function () {
 
     //Email Methods
     Route::post('send-files', [FileUploadController::class, 'sendFilesByEmail']);
+
 });
 
 require __DIR__.'/auth.php';

@@ -28,6 +28,7 @@ class Product extends FormRequest
             'price'           => ['required'],
             'presentation_id' => ['required'],
             'company_id'      => ['required|integer'],
+            'product_metadata_code' => ['required', 'exists:product_metadata,code'],
         ];
     }
 
@@ -38,6 +39,7 @@ class Product extends FormRequest
             'price.required'           => 'Ingrese precio del producto',
             'presentation_id.required' => 'Debe seleccionar una presentacion del producto',
             'company_id.required'      => 'Debe loguearse seleccionando una empresa',
+            'product_metadata_code.required'  => 'Debe seleccionar una categoria para este medicamento'
         ] ;
     }
 }
