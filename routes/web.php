@@ -18,7 +18,7 @@ use App\Http\Controllers\Api\PresentationController;
 use App\Http\Controllers\Api\PatientAddressController;
 use App\Http\Controllers\Api\PatientLmDetailController;
 use App\Http\Controllers\Api\PatientDiagnosticController;
-use App\Http\Controllers\api\ProductMetadataController;
+use App\Http\Controllers\Api\ProductMetadataController;
 
 /*
 |--------------------------------------------------------------------------
