@@ -43,7 +43,7 @@ Route::get('/', function () {
 });
 
 //Components Routes
-Route::group(['auth', 'verified'], function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
     Route::inertia('/brandpage', 'BrandPage')->name('brandpage');
     Route::inertia('/patientpage', 'PatientPage')->name('patientpage');
