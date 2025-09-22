@@ -233,9 +233,9 @@ export default {
 
   mounted() {
     (async () => {
-      await this.getPresentations();           // primero options
+      await this.getPresentations();
       if (this.$props.editId) {
-        await this.getEditData();              // luego datos del producto
+        await this.getEditData();
       }
     })();
 
