@@ -19750,6 +19750,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _Pages_Presentations_CreatePresentation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Pages/Presentations/CreatePresentation */ "./resources/js/Pages/Presentations/CreatePresentation.vue");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -19757,19 +19763,26 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
+ // ❌ No importes un Dropdown local: PrimeVue ya registra el suyo globalmente
+// import Dropdown from "../Dropdown.vue";
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "ProductForm",
   components: {
     CreatePresentation: _Pages_Presentations_CreatePresentation__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
+  props: {
+    editId: Number
+  },
   data: function data() {
     return {
       form: {
+        id: null,
         name: null,
-        price: null,
+        price: 0,
         presentation_id: null,
-        observation: null
+        observation: null,
+        product_metadata_code: null
       },
       presentations: [],
       brands: [],
@@ -19782,18 +19795,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       loadingMetadata: false,
       metadataPage: 1,
       metadataTotal: 0,
-      error_product_metadata_code: null
+      error_product_metadata_code: null,
+      // 👇 para mostrar la compañía en solo lectura
+      companyDisplay: "-"
     };
-  },
-  props: {
-    editId: Number
   },
   methods: {
     loadMetadata: function loadMetadata(event) {
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var _this$form$id, res;
+        var _this$form$id, _res$data$total, res;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
@@ -19802,7 +19814,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 _this.loadingMetadata = true;
                 _context.prev = 1;
                 _context.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get('/api/product_metadata', {
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/product_metadata", {
                   params: {
                     search: event.query,
                     product_id: (_this$form$id = _this.form.id) !== null && _this$form$id !== void 0 ? _this$form$id : _this.$props.editId,
@@ -19813,20 +19825,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 4:
                 res = _context.sent;
-                _this.filteredMetadata = res.data.data.map(function (item) {
+                _this.filteredMetadata = (res.data.data || []).map(function (item) {
                   return {
                     label: "".concat(item.code, " - ").concat(item.name),
                     code: item.code
                   };
                 });
-                _this.metadataTotal = res.data.total;
+                _this.metadataTotal = (_res$data$total = res.data.total) !== null && _res$data$total !== void 0 ? _res$data$total : 0;
                 _context.next = 12;
                 break;
 
               case 9:
                 _context.prev = 9;
                 _context.t0 = _context["catch"](1);
-                console.error('Error cargando metadata', _context.t0);
+                console.error("Error cargando metadata", _context.t0);
 
               case 12:
                 _this.loadingMetadata = false;
@@ -19843,16 +19855,24 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this2 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        var res;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().get('api/presentations').then(function (res) {
-                  _this2.presentations = res.data;
-                });
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/presentations");
 
               case 2:
+                res = _context2.sent;
+                // Asegura IDs numéricos para que el Dropdown seleccione correctamente
+                _this2.presentations = (res.data || []).map(function (r) {
+                  return _objectSpread(_objectSpread({}, r), {}, {
+                    id: Number(r.id)
+                  });
+                });
+
+              case 4:
               case "end":
                 return _context2.stop();
             }
@@ -19863,93 +19883,87 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     cleanForm: function cleanForm() {
       var _this3 = this;
 
-      Object.keys(this.form).map(function (val, index) {
-        return _this3.form[index] = null;
+      Object.keys(this.form).forEach(function (k) {
+        return _this3.form[k] = null;
       });
+      this.form.price = 0;
     },
     submit: function submit() {
       var _this4 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
-        var res, err, _res, _err;
+        var err, _err;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 if (_this4.$props.editId) {
-                  _context3.next = 13;
+                  _context3.next = 12;
                   break;
                 }
 
                 _context3.prev = 1;
                 _context3.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/products', _this4.form);
+                return axios__WEBPACK_IMPORTED_MODULE_1___default().post("/api/products", _this4.form);
 
               case 4:
-                res = _context3.sent;
-
                 _this4.cleanForm();
 
-                return _context3.abrupt("return", _this4.emitter.emit('products_reload'));
+                return _context3.abrupt("return", _this4.emitter.emit("products_reload"));
 
-              case 9:
-                _context3.prev = 9;
+              case 8:
+                _context3.prev = 8;
                 _context3.t0 = _context3["catch"](1);
 
-                if (_context3.t0.response) {
-                  switch (_context3.t0.response.status) {
-                    case 422:
-                      err = _context3.t0.response.data.errors;
-                      _this4.error_name = err.name ? err.name[0] : null;
-                      _this4.error_presentation_id = err.presentation_id ? err.presentation_id[0] : null;
-                      _this4.error_price = err.price ? err.price[0] : null;
-                  }
+                if (_context3.t0.response && _context3.t0.response.status === 422) {
+                  err = _context3.t0.response.data.errors || {};
+                  _this4.error_name = err.name ? err.name[0] : null;
+                  _this4.error_presentation_id = err.presentation_id ? err.presentation_id[0] : null;
+                  _this4.error_price = err.price ? err.price[0] : null;
                 }
 
                 return _context3.abrupt("return", null);
 
-              case 13:
-                _context3.prev = 13;
-                _context3.next = 16;
+              case 12:
+                _context3.prev = 12;
+                _context3.next = 15;
                 return axios__WEBPACK_IMPORTED_MODULE_1___default().put("/api/products/".concat(_this4.$props.editId), _this4.form);
 
-              case 16:
-                _res = _context3.sent;
-
+              case 15:
                 _this4.cleanForm();
 
-                return _context3.abrupt("return", _this4.emitter.emit('products_reload'));
+                return _context3.abrupt("return", _this4.emitter.emit("products_reload"));
 
-              case 21:
-                _context3.prev = 21;
-                _context3.t1 = _context3["catch"](13);
+              case 19:
+                _context3.prev = 19;
+                _context3.t1 = _context3["catch"](12);
 
-                if (_context3.t1.response) {
-                  switch (_context3.t1.response.status) {
-                    case 422:
-                      _err = _context3.t1.response.data.errors;
-                      _this4.error_name = _err.name ? _err.name[0] : null;
-                      _this4.error_presentation_id = _err.presentacion_id ? _err.presentacion_id[0] : null;
-                      _this4.error_price = _err.price ? _err.price[0] : null;
-                  }
+                if (_context3.t1.response && _context3.t1.response.status === 422) {
+                  _err = _context3.t1.response.data.errors || {};
+                  _this4.error_name = _err.name ? _err.name[0] : null;
+                  _this4.error_presentation_id = _err.presentation_id ? _err.presentation_id[0] : null; // 👈 corregido
+
+                  _this4.error_price = _err.price ? _err.price[0] : null;
                 }
 
                 return _context3.abrupt("return", null);
 
-              case 25:
+              case 23:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, null, [[1, 9], [13, 21]]);
+        }, _callee3, null, [[1, 8], [12, 19]]);
       }))();
     },
     getEditData: function getEditData() {
       var _this5 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
-        var res, found, _res$data$product_met, _res$data$product_met2, _res$data$product_met3, _res$data$product_met4, _res$data$product_met5;
+        var _res$data$data, _res$data, _p$id, _p$name, _numOrNull, _p$company;
+
+        var res, p, numOrNull, cid, found, _p$product_metadata, _p$product_metadata$c, _p$product_metadata2, _p$product_metadata$n, _p$product_metadata3;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
           while (1) {
@@ -19960,25 +19974,46 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 2:
                 res = _context4.sent;
-                _this5.form.name = res.data.name;
-                _this5.form.presentation_id = res.data.presentation_id;
-                _this5.form.price = parseFloat(res.data.price); // 👇 Buscar si ya está en filteredMetadata
+                // Soporta respuestas con o sin wrapper "data"
+                p = (_res$data$data = (_res$data = res.data) === null || _res$data === void 0 ? void 0 : _res$data.data) !== null && _res$data$data !== void 0 ? _res$data$data : res.data; // Helper: número seguro (evita NaN y soporta coma decimal)
+
+                numOrNull = function numOrNull(v) {
+                  if (v === null || v === undefined || v === "") return null;
+                  var n = Number(String(v).replace(",", "."));
+                  return Number.isFinite(n) ? n : null;
+                }; // Seteo de campos
+
+
+                _this5.form.id = (_p$id = p.id) !== null && _p$id !== void 0 ? _p$id : null;
+                _this5.form.name = (_p$name = p.name) !== null && _p$name !== void 0 ? _p$name : "";
+                _this5.form.presentation_id = numOrNull(p.presentation_id);
+                _this5.form.price = (_numOrNull = numOrNull(p.price)) !== null && _numOrNull !== void 0 ? _numOrNull : 0; // Compañía (solo lectura): nombre si viene la relación; si no, "ID x"; si nada, "-"
+
+                cid = numOrNull(p.company_id);
+
+                if ((_p$company = p.company) !== null && _p$company !== void 0 && _p$company.name) {
+                  _this5.companyDisplay = p.company.name;
+                } else if (cid !== null) {
+                  _this5.companyDisplay = "ID ".concat(cid);
+                } else {
+                  _this5.companyDisplay = "-";
+                } // MetaData (como ya la tenías)
+
 
                 found = _this5.filteredMetadata.find(function (item) {
-                  return item.code === res.data.product_metadata_code;
+                  return item.code === p.product_metadata_code;
                 });
 
                 if (found) {
                   _this5.selectedMetadata = found;
                 } else {
-                  // fallback si no está cargado aún
                   _this5.selectedMetadata = {
-                    code: (_res$data$product_met = res.data.product_metadata) === null || _res$data$product_met === void 0 ? void 0 : _res$data$product_met.code,
-                    label: "".concat((_res$data$product_met2 = (_res$data$product_met3 = res.data.product_metadata) === null || _res$data$product_met3 === void 0 ? void 0 : _res$data$product_met3.code) !== null && _res$data$product_met2 !== void 0 ? _res$data$product_met2 : '', " - ").concat((_res$data$product_met4 = (_res$data$product_met5 = res.data.product_metadata) === null || _res$data$product_met5 === void 0 ? void 0 : _res$data$product_met5.name) !== null && _res$data$product_met4 !== void 0 ? _res$data$product_met4 : '')
+                    code: (_p$product_metadata = p.product_metadata) === null || _p$product_metadata === void 0 ? void 0 : _p$product_metadata.code,
+                    label: "".concat((_p$product_metadata$c = (_p$product_metadata2 = p.product_metadata) === null || _p$product_metadata2 === void 0 ? void 0 : _p$product_metadata2.code) !== null && _p$product_metadata$c !== void 0 ? _p$product_metadata$c : "", " - ").concat((_p$product_metadata$n = (_p$product_metadata3 = p.product_metadata) === null || _p$product_metadata3 === void 0 ? void 0 : _p$product_metadata3.name) !== null && _p$product_metadata$n !== void 0 ? _p$product_metadata$n : "")
                   };
                 }
 
-              case 8:
+              case 13:
               case "end":
                 return _context4.stop();
             }
@@ -19993,20 +20028,39 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   mounted: function mounted() {
     var _this6 = this;
 
-    this.getPresentations();
+    _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              _context5.next = 2;
+              return _this6.getPresentations();
 
-    if (this.$props.editId) {
-      this.getEditData();
-    }
+            case 2:
+              if (!_this6.$props.editId) {
+                _context5.next = 5;
+                break;
+              }
 
-    this.emitter.on('createpresentation_reload', function () {
+              _context5.next = 5;
+              return _this6.getEditData();
+
+            case 5:
+            case "end":
+              return _context5.stop();
+          }
+        }
+      }, _callee5);
+    }))();
+
+    this.emitter.on("createpresentation_reload", function () {
       _this6.displayCreatePresentation = false;
 
       _this6.getPresentations();
 
       _this6.$toast.add({
-        severity: 'success',
-        summary: 'SUCCESS!',
+        severity: "success",
+        summary: "SUCCESS!",
         detail: "Presentacion cargado",
         life: 3000
       });
@@ -25039,7 +25093,7 @@ var _hoisted_5 = {
   "class": "p-field"
 };
 
-var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Presentacion ");
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Presentacion ");
 
 var _hoisted_7 = {
   "class": "text-red-500"
@@ -25064,6 +25118,21 @@ var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 );
 
 var _hoisted_13 = {
+  key: 0,
+  "class": "p-field"
+};
+
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", null, "Compañía", -1
+/* HOISTED */
+);
+
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("small", {
+  "class": "text-gray-500"
+}, "Este valor proviene del producto y no puede editarse.", -1
+/* HOISTED */
+);
+
+var _hoisted_16 = {
   "class": "p-field"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -25139,7 +25208,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     panelStyle: "max-height: 150px; overflow-y: auto;"
   }, null, 8
   /* PROPS */
-  , ["modelValue", "suggestions", "loading", "onComplete"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
+  , ["modelValue", "suggestions", "loading", "onComplete"])]), $props.editId ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_13, [_hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_InputText, {
+    value: $data.companyDisplay,
+    "class": "w-100",
+    disabled: ""
+  }, null, 8
+  /* PROPS */
+  , ["value"]), _hoisted_15])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_PrimeButton, {
     icon: "pi pi-save",
     label: "Guardar",
     "class": "sm:-bottom-1.5",
@@ -25155,7 +25230,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "onUpdate:visible": _cache[5] || (_cache[5] = function ($event) {
       return $data.displayCreatePresentation = $event;
     }),
-    maxiizable: false
+    maximizable: false
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
       return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_CreatePresentation)];

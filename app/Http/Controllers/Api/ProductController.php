@@ -30,12 +30,12 @@ class ProductController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $companyId = intval(session('company'));
         $perPage = $request->input('perPage', 10);
         $currentPage = $request->input('page', 1);
         $globalFilter = $request->input('filters', '');
 
-        $query = Product::where('company_id', $companyId);
+        // quitamos el where de company_id
+        $query = Product::query();
 
         if ($globalFilter) {
             $query->where(function ($q) use ($globalFilter) {
@@ -45,7 +45,9 @@ class ProductController extends Controller
 
         $totalRecords = $query->count();
 
-        $products = $query->orderBy('name', 'asc')->paginate($perPage, ['*'], 'page', $currentPage);
+        $products = $query->orderBy('name', 'asc')
+                        ->paginate($perPage, ['*'], 'page', $currentPage);
+
         $totalPages = ceil($totalRecords / $perPage);
 
         return response()->json([
@@ -54,6 +56,7 @@ class ProductController extends Controller
             'totalPages' => $totalPages,
         ]);
     }
+
 
     public function getMedicines(): JsonResponse
     {
@@ -88,12 +91,11 @@ class ProductController extends Controller
      * @param Product $product
      * @return JsonResponse
      */
-    public function show(Product $product): JsonResponse
-    {
-        return response()->json(
-            new ProductResource($product)
-        );
-    }
+        public function show(Product $product)
+        {
+            $product->load('company');
+            return new ProductResource($product);
+        }
 
     /**
      * Update the specified resource in storage.
@@ -106,26 +108,22 @@ class ProductController extends Controller
     {
         $product->update($request->all());
 
-        $companyId = intval(session('company'));
-
         // Buscar la nueva metadata (si fue enviada)
         $metadata = ProductMetadata::where('code', $request->input('product_metadata_code'))->first();
 
         if ($metadata) {
-            // Verificar si ya existe un registro de relación
-            $relation = CompanyProductMetadata::where('product_id', $product->id)
-                ->where('company_id', $companyId)
-                ->first();
+            // Verificar si ya existe un registro de relación (independiente del company_id)
+            $relation = CompanyProductMetadata::where('product_id', $product->id)->first();
 
             if ($relation) {
-                // Actualizar metadata
+                // Actualizar metadata sin tocar el company_id
                 $relation->update([
                     'product_metadata_id' => $metadata->id
                 ]);
             } else {
-                // Crear nueva relación
+                // Crear nueva relación manteniendo el company_id que tenga el producto
                 CompanyProductMetadata::create([
-                    'company_id' => $companyId,
+                    'company_id' => $product->company_id, // se usa el que ya está en la BD
                     'product_id' => $product->id,
                     'product_metadata_id' => $metadata->id
                 ]);
@@ -134,6 +132,7 @@ class ProductController extends Controller
 
         return response()->json(new ProductResource($product));
     }
+
 
     /**
      * Remove the specified resource from storage.

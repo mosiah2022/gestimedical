@@ -26,7 +26,11 @@ class Product extends JsonResource
             'price'           => $this->price,
             'presentation_id' => $this->presentation_id,
             'full_name'       => $this->name,
-
+            'company_id'      => $this->company_id,
+            'company'         => $this->whenLoaded('company', function () {
+                return new CompanyResource($this->company);
+            }),
+            
             // Devuelve el objeto completo como recurso
             'product_metadata' => $metadata
                 ? new ProductMetadataResource($metadata)

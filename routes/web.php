@@ -7,18 +7,19 @@ use Illuminate\Foundation\Application;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\DoctorController;
+use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PatientLmController;
 use App\Http\Controllers\Api\FileUploadController;
-use App\Http\Controllers\Api\PreInvoiceController;
 
+use App\Http\Controllers\Api\PreInvoiceController;
 use App\Http\Controllers\Api\PresentationController;
 use App\Http\Controllers\Api\PatientAddressController;
 use App\Http\Controllers\Api\PatientLmDetailController;
-use App\Http\Controllers\Api\PatientDiagnosticController;
 use App\Http\Controllers\Api\ProductMetadataController;
+use App\Http\Controllers\Api\PatientDiagnosticController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +72,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'api'], function () {
     Route::apiResource('presentations', PresentationController::class);
     Route::apiResource('invoices', InvoiceController::class);
     Route::apiResource('patient_addresses', PatientAddressController::class);
+    Route::apiResource('companies', CompanyController::class)->only(['index', 'show']);
 
     //Only for method get
     Route::get('showlmdetail/{id}', [PatientLmDetailController::class, 'showlmdetail']);
