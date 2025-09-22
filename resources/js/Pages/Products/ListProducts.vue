@@ -22,6 +22,11 @@
                 </div>
             </template>
             <Column field="name" header="Nombre"></Column>
+            <Column field="company.name" header="Compañía">
+                <template #body="slotProps">
+                {{ slotProps.data.company?.name || '-' }}
+                </template>
+            </Column>
             <Column bodyStyle="text-align: center; overflow: visible" header="Acción"
                     headerStyle="text-align: center">
                 <template #body="slotProps">
@@ -30,7 +35,7 @@
                 </template>
             </Column>
         </DataTable>
-        
+
     <Dialog :header="editId === null ? 'Crear Producto' : 'Editar Producto'" :style="{width: '50vw'}"
             v-model:visible="display">
         <ProductForm :editId="editId" />

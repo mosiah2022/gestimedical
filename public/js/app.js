@@ -30088,6 +30088,20 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         field: "name",
         header: "Nombre"
       }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
+        field: "company.name",
+        header: "Compañía"
+      }, {
+        body: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (slotProps) {
+          var _slotProps$data$compa;
+
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(((_slotProps$data$compa = slotProps.data.company) === null || _slotProps$data$compa === void 0 ? void 0 : _slotProps$data$compa.name) || '-'), 1
+          /* TEXT */
+          )];
+        }),
+        _: 1
+        /* STABLE */
+
+      }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Column, {
         bodyStyle: "text-align: center; overflow: visible",
         header: "Acción",
         headerStyle: "text-align: center"

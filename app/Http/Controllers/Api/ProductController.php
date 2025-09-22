@@ -34,8 +34,7 @@ class ProductController extends Controller
         $currentPage = $request->input('page', 1);
         $globalFilter = $request->input('filters', '');
 
-        // quitamos el where de company_id
-        $query = Product::query();
+        $query = Product::with('company');
 
         if ($globalFilter) {
             $query->where(function ($q) use ($globalFilter) {
@@ -46,7 +45,7 @@ class ProductController extends Controller
         $totalRecords = $query->count();
 
         $products = $query->orderBy('name', 'asc')
-                        ->paginate($perPage, ['*'], 'page', $currentPage);
+            ->paginate($perPage, ['*'], 'page', $currentPage);
 
         $totalPages = ceil($totalRecords / $perPage);
 
