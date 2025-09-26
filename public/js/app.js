@@ -21988,9 +21988,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     cleanFormMed: function cleanFormMed() {
       var _this = this;
 
-      console.log(Object.keys(this.formprod));
-      Object.keys(this.formprod).map(function (val, index) {
-        return _this.formprod[index] = '';
+      Object.keys(this.formprod).forEach(function (key) {
+        _this.formprod[key] = null; // en vez de this.formprod[index] = ''
       });
     },
     getMedicines: function getMedicines() {
@@ -22018,47 +22017,97 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var res, err;
+        var orderId;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                if (_this3.formprod.product_id) {
+                  _context2.next = 3;
+                  break;
+                }
+
+                _this3.$toast.add({
+                  severity: 'warn',
+                  summary: 'Falta medicamento',
+                  detail: 'Seleccione un medicamento',
+                  life: 2000
+                });
+
+                return _context2.abrupt("return");
+
+              case 3:
+                if (!(!_this3.formprod.prescription || Number(_this3.formprod.prescription) <= 0)) {
+                  _context2.next = 6;
+                  break;
+                }
+
+                _this3.$toast.add({
+                  severity: 'warn',
+                  summary: 'Cantidad inválida',
+                  detail: 'Ingrese una cantidad mayor a 0',
+                  life: 2000
+                });
+
+                return _context2.abrupt("return");
+
+              case 6:
+                if (!(_this3.formprod.price_detail == null)) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                _this3.$toast.add({
+                  severity: 'warn',
+                  summary: 'Precio no definido',
+                  detail: 'Espere a que cargue el precio',
+                  life: 2000
+                });
+
+                return _context2.abrupt("return");
+
+              case 9:
                 _this3.save_action = false;
                 _this3.animation_wait = true;
-                _context2.prev = 2;
-                _context2.next = 5;
+                _context2.prev = 11;
+                _context2.next = 14;
                 return axios__WEBPACK_IMPORTED_MODULE_3___default().post('api/patient_lm_details', _this3.formprod);
 
-              case 5:
-                res = _context2.sent;
+              case 14:
+                // Guarda antes de limpiar para no perderlo
+                orderId = _this3.formprod.order_id;
 
-                _this3.cleanFormMed();
+                _this3.cleanFormMed(); // Restituye order_id y patient_id para que el flujo siga igual
 
-                _this3.getDetailLms(_this3.formprod.order_id);
+
+                _this3.formprod.order_id = orderId;
+                _this3.formprod.patient_id = _this3.$props.patient_id;
+
+                _this3.getDetailLms(orderId);
 
                 _this3.save_action = true;
                 return _context2.abrupt("return", _this3.emitter.emit('patient_lm_detail_reload'));
 
-              case 12:
-                _context2.prev = 12;
-                _context2.t0 = _context2["catch"](2);
+              case 23:
+                _context2.prev = 23;
+                _context2.t0 = _context2["catch"](11);
 
-                if (_context2.t0.response) {
-                  switch (_context2.t0.response.status) {
-                    case 422:
-                      err = _context2.t0.response.data.errors;
-                    //this.error_lm_id = err.lm_id ? err.lm_id[0] : null
-                  }
+                if (_context2.t0.response && _context2.t0.response.status === 422) {// Manejo 422 si lo necesitas
                 }
 
                 return _context2.abrupt("return", null);
 
-              case 16:
+              case 27:
+                _context2.prev = 27;
+                _this3.animation_wait = false;
+                return _context2.finish(27);
+
+              case 30:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[2, 12]]);
+        }, _callee2, null, [[11, 23, 27, 30]]);
       }))();
     },
     getDetailLms: function getDetailLms(id) {
@@ -22132,22 +22181,54 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this6 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
-        var product_id;
+        var product_id, _yield$axios$get, data, price;
+
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
-                product_id = event.value;
-                axios__WEBPACK_IMPORTED_MODULE_3___default().get("/api/products/".concat(product_id)).then(function (res) {
-                  _this6.formprod.price_detail = res.data.price;
+                product_id = event.value; // Si limpiaron el dropdown, resetea el precio
+
+                if (product_id) {
+                  _context5.next = 4;
+                  break;
+                }
+
+                _this6.formprod.price_detail = null;
+                return _context5.abrupt("return");
+
+              case 4:
+                _context5.prev = 4;
+                _context5.next = 7;
+                return axios__WEBPACK_IMPORTED_MODULE_3___default().get("/api/products/".concat(product_id));
+
+              case 7:
+                _yield$axios$get = _context5.sent;
+                data = _yield$axios$get.data;
+                price = Number(data === null || data === void 0 ? void 0 : data.price);
+                _this6.formprod.price_detail = Number.isFinite(price) ? price : 0; // nunca null
+
+                _context5.next = 17;
+                break;
+
+              case 13:
+                _context5.prev = 13;
+                _context5.t0 = _context5["catch"](4);
+                _this6.formprod.price_detail = null; // fuerza validación
+
+                _this6.$toast.add({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: 'No se pudo cargar el precio del producto',
+                  life: 2000
                 });
 
-              case 2:
+              case 17:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5);
+        }, _callee5, null, [[4, 13]]);
       }))();
     },
     rowClass: function rowClass(data) {
@@ -27814,10 +27895,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     icon: "pi pi-plus",
     label: "Guardar",
     "class": "w-full",
+    disabled: !$data.formprod.product_id || !$data.formprod.prescription || $data.formprod.price_detail == null,
     onClick: $options.add
   }, null, 8
   /* PROPS */
-  , ["onClick"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [$data.animation_wait === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_10, [_hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ProgressSpinner)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DataTable, {
+  , ["disabled", "onClick"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [$data.animation_wait === true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_10, [_hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ProgressSpinner)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DataTable, {
     filters: $data.filter,
     value: $data.details,
     dataKey: "id",

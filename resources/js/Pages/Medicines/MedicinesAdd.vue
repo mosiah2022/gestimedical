@@ -20,7 +20,12 @@
             </div>
             <div class="field col" v-if="save_action === true">
                 <label class="font-bold text-teal-500">Acciones</label>
-                <PrimeButton icon="pi pi-plus" label="Guardar" class="w-full" @click="add" />
+                <PrimeButton
+                    icon="pi pi-plus"
+                    label="Guardar"
+                    class="w-full"
+                    :disabled="!formprod.product_id || !formprod.prescription || formprod.price_detail == null"
+                    @click="add" />
             </div>
         </div>
 
@@ -131,8 +136,9 @@ import axios from "axios";
                 return this.emitter.emit('price_update_reload')
             },
             cleanFormMed () {
-                console.log(Object.keys(this.formprod))
-                Object.keys(this.formprod).map((val, index) => this.formprod[index] = '')
+                Object.keys(this.formprod).forEach((key) => {
+                    this.formprod[key] = null; // en vez de this.formprod[index] = ''
+                });
             },
             async getMedicines() {
                 await axios.get('api/getMedicines').then((res) => {
@@ -140,24 +146,46 @@ import axios from "axios";
                 })
             },
             async add () {
-                this.save_action = false
-                this.animation_wait = true
+                // Validaciones mínimas para evitar enviar null
+                if (!this.formprod.product_id) {
+                    this.$toast.add({ severity:'warn', summary:'Falta medicamento', detail:'Seleccione un medicamento', life:2000 });
+                    return;
+                }
+                if (!this.formprod.prescription || Number(this.formprod.prescription) <= 0) {
+                    this.$toast.add({ severity:'warn', summary:'Cantidad inválida', detail:'Ingrese una cantidad mayor a 0', life:2000 });
+                    return;
+                }
+                if (this.formprod.price_detail == null) {
+                    this.$toast.add({ severity:'warn', summary:'Precio no definido', detail:'Espere a que cargue el precio', life:2000 });
+                    return;
+                }
+
+                this.save_action = false;
+                this.animation_wait = true;
+
                 try {
-                    const res = await axios.post('api/patient_lm_details', this.formprod)
+                    await axios.post('api/patient_lm_details', this.formprod);
+
+                    // Guarda antes de limpiar para no perderlo
+                    const orderId = this.formprod.order_id;
+
                     this.cleanFormMed();
-                    this.getDetailLms(this.formprod.order_id);
-                    this.save_action = true
-                    return this.emitter.emit('patient_lm_detail_reload')
+                    // Restituye order_id y patient_id para que el flujo siga igual
+                    this.formprod.order_id = orderId;
+                    this.formprod.patient_id = this.$props.patient_id;
+
+                    this.getDetailLms(orderId);
+                    this.save_action = true;
+                    return this.emitter.emit('patient_lm_detail_reload');
                 }
                 catch (e) {
-                    if (e.response) {
-                        switch (e.response.status) {
-                            case 422:
-                                let err = e.response.data.errors
-                                //this.error_lm_id = err.lm_id ? err.lm_id[0] : null
-                        }
+                    if (e.response && e.response.status === 422) {
+                    // Manejo 422 si lo necesitas
                     }
-                    return null
+                    return null;
+                }
+                finally {
+                    this.animation_wait = false;
                 }
             },
             async getDetailLms(id) {
@@ -191,10 +219,27 @@ import axios from "axios";
                 })
             },
             async handleChange(event) {
-                let product_id = event.value;
-                axios.get(`/api/products/${product_id}`).then((res) => {
-                    this.formprod.price_detail = res.data.price
-                })
+                const product_id = event.value;
+
+                // Si limpiaron el dropdown, resetea el precio
+                if (!product_id) {
+                    this.formprod.price_detail = null;
+                    return;
+                }
+
+                try {
+                    const { data } = await axios.get(`/api/products/${product_id}`);
+                    const price = Number(data?.price);
+                    this.formprod.price_detail = Number.isFinite(price) ? price : 0; // nunca null
+                } catch (e) {
+                    this.formprod.price_detail = null; // fuerza validación
+                    this.$toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'No se pudo cargar el precio del producto',
+                    life: 2000,
+                    });
+                }
             },
             rowClass(data) {
                 const exists = data.products?.exists_in_metadata;
