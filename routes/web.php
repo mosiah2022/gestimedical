@@ -89,6 +89,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'api'], function () {
     Route::get('getMedicines', [ProductController::class, 'getMedicines']);
     Route::get('list_files/{patient_id}', [FileUploadController::class, 'listFiles']);
     Route::get('product_metadata', [ProductMetadataController::class, 'index']);
+    Route::get('medicines/search', [ProductController::class, 'search']);
 
     //Exports Excel
     Route::get('export_patients/{iniDate}/{endDate}', [PatientController::class, 'export']);

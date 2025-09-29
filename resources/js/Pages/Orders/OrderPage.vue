@@ -34,7 +34,7 @@
 
             <Dialog
                 :header="'Editando orden'"
-                :style="{width: '50vw'}"
+                :style="{width: '80vw'}"
                 v-model:visible="displayOrderEdit"
                 :maximizable="true"
             >

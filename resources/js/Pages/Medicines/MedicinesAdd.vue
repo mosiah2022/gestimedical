@@ -1,24 +1,48 @@
 <template>
     <div class="card">
+
         <div class="formgrid grid">
-            <div class="field col">
-                <label class="font-bold text-teal-500">Seleccione Medicamento<span class="pi pi-plus-circle justify-center cursor-pointer text-lime-600" @click="viewCreateProduct" label="Nuevo"  /></label>
-                <Dropdown class="w-full"
-                    v-model="formprod.product_id"
-                    :options="medicines"
-                    optionLabel="full_name"
-                    optionValue="id"
-                    :filter="true"
-                    filterPlaceholder="Buscar medicamento"
-                    :showClear="true"
-                    @change="handleChange"
-                />
+
+            <div class="field col-12 md:col-6">
+                    <label class="font-bold text-teal-500 flex items-center gap-2">
+                        <span>Seleccione Medicamento</span>
+                        <i
+                        class="pi pi-plus-circle cursor-pointer text-lime-600"
+                        @click="viewCreateProduct"
+                        title="Nuevo"
+                        />
+                    </label>
+                    <AutoComplete
+                        class="w-full"
+                        v-model="selectedMedicine"
+                        :suggestions="medicineOptions"
+                        field="name"
+                        @complete="searchMedicines"
+                        :minLength="0"
+                        :dropdown="true"
+                        :forceSelection="false"
+                        :virtualScrollerOptions="{ itemSize: 40 }"
+                        :loading="searchLoading"
+                        placeholder="Buscar medicamento"
+                        appendTo="body"
+                        @item-select="onSelectMedicine"
+                        @clear="onClearMedicine"
+                    >
+                    <template #option="{ option }">
+                        <div class="flex flex-col w-full">
+                            <span class="whitespace-normal break-words text-sm">{{ option.name }}</span>
+                            <small class="text-gray-500">{{ formatCurrency(option.price ?? 0) }}</small>
+                        </div>
+                    </template>
+                </AutoComplete>
             </div>
+
              <div class="field col">
                 <label class="font-bold text-teal-500">Cantidad</label>
                 <InputNumber v-model="formprod.prescription" class="w-full" placeholder="Ingrese una cantidad" :minFractionDigits="0" />
             </div>
-            <div class="field col" v-if="save_action === true">
+
+            <div class="field col" v-if="save_action">
                 <label class="font-bold text-teal-500">Acciones</label>
                 <PrimeButton
                     icon="pi pi-plus"
@@ -27,7 +51,8 @@
                     :disabled="!formprod.product_id || !formprod.prescription || formprod.price_detail == null"
                     @click="add" />
             </div>
-        </div>
+
+    </div>
 
         <div>
             <span class="justify-center" v-if="animation_wait === true">Espere un momento por favor <ProgressSpinner /></span>
@@ -94,7 +119,7 @@
 </template>
 
 <script>
-
+import AutoComplete from "primevue/autocomplete";
 import ProductForm from "@/Components/Products/ProductForm";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -102,14 +127,20 @@ import axios from "axios";
     export default {
         name: "MedicineAdd",
         components: {
-            ProductForm
+            ProductForm,
+            AutoComplete
         },
         data() {
             return {
                 editingRows: [],
-                medicines: [],
                 details: [],
                 filter: [],
+                selectedMedicine: null,
+                medicineOptions: [],
+                searchLoading: false,
+                cancelSrc: null,
+                abortCtrl: null,
+                appendToTarget: null,
                 formprod: {
                     product_id: null,
                     order_id: null,
@@ -140,10 +171,46 @@ import axios from "axios";
                     this.formprod[key] = null; // en vez de this.formprod[index] = ''
                 });
             },
-            async getMedicines() {
-                await axios.get('api/getMedicines').then((res) => {
-                    this.medicines = res.data
-                })
+            async searchMedicines(event) {
+                const q = (event?.query ?? "").trim();
+                //console.log('[AC] query =', q);
+
+                // cancela petición previa si el usuario sigue tecleando
+                if (this.abortCtrl) this.abortCtrl.abort();
+                this.abortCtrl = new AbortController();
+
+                this.searchLoading = true;
+                try {
+                    const { data } = await axios.get('api/medicines/search', {
+                        params: { q, limit: 30 },
+                        signal: this.abortCtrl.signal,
+                        withCredentials: true,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+                    this.medicineOptions = Array.isArray(data) ? data : [];
+                } catch (e) {
+                    if (e.name !== 'CanceledError' && e.name !== 'AbortError') {
+                        console.warn('AC error', e?.response?.status, e?.message);
+                        this.$toast?.add?.({ severity:'error', summary:'Búsqueda', detail:'No se pudo buscar', life:1500 });
+                    }
+                this.medicineOptions = [];
+                } finally {
+                    this.searchLoading = false;  // ✅ el spinner se apaga siempre
+                }
+
+            },
+            onSelectMedicine(e) {
+                const med = e?.value;
+                if (!med) return this.onClearMedicine();
+                this.selectedMedicine = med;
+                this.formprod.product_id   = med.id;
+                this.formprod.price_detail = Number(med.price ?? 0);
+            },
+
+            onClearMedicine() {
+                this.selectedMedicine = null;
+                this.formprod.product_id   = null;
+                this.formprod.price_detail = null;
             },
             async add () {
                 // Validaciones mínimas para evitar enviar null
@@ -247,13 +314,13 @@ import axios from "axios";
             }
         },
         mounted(){
-            this.getMedicines();
             this.formprod.order_id = this.$props.order_id;
             this.formprod.patient_id = this.$props.patient_id;
             this.getDetailLms(this.formprod.order_id);
+            this.appendToTarget = document.body;
 
             this.emitter.on('products_reload', () => {
-                this.getMedicines()
+                this.selectedMedicine = null;
                 this.displayCreateProduct = false;
                 this.$toast.add({
                     severity:'success', summary: 'SUCCESS!',

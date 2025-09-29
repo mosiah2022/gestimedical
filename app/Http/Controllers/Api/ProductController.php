@@ -7,8 +7,10 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\ProductMetadata;
 use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use App\Models\CompanyProductMetadata;
 use App\Http\Resources\ProductCollection;
 use App\Http\Resources\Product as ProductResource;
@@ -152,4 +154,49 @@ class ProductController extends Controller
         ]);
         return response()->json("Se actualizo correctamente");
     }
+
+    //Nuevo metodo para buscar medicamentos optimizado
+    public function search(Request $request): JsonResponse
+    {
+        $request->validate([
+            'q'     => 'nullable|string|max:80',
+            'limit' => 'nullable|integer|min:1|max:100',
+            'cursor'=> 'nullable|string|max:190',
+        ]);
+
+        $companyId = (int) session('company');
+        $q         = trim((string) $request->query('q', ''));
+        $limit     = (int) ($request->query('limit', 30) ?: 30);
+        $cursor    = $request->query('cursor');
+
+        $cacheKey = "med:search:c{$companyId}:q{$q}:l{$limit}:cur{$cursor}";
+        $rows = Cache::remember($cacheKey, 60, function () use ($companyId, $q, $limit, $cursor) {
+            $builder = DB::table('products')
+                ->where('company_id', $companyId)
+                ->select([
+                    'id',
+                    'name',
+                    'price',
+                    DB::raw("CONCAT(name) AS full_name"),
+                ]);
+
+            if ($q !== '') {
+                $term = $q.'%'; // prefijo -> aprovecha índice
+                $builder->where('name', 'like', $term)
+                        ->orderByRaw("(name LIKE ?) DESC, name ASC", [$term]);
+            } else {
+                $builder->orderBy('name', 'asc');
+            }
+
+            if ($cursor) {
+                $builder->where('name', '>', $cursor);
+            }
+
+            return $builder->limit($limit)->get();
+        });
+
+        return response()->json($rows)
+            ->header('Cache-Control', 'private, max-age=60');
+    }
+
 }
