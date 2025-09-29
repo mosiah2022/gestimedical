@@ -181,7 +181,7 @@ import axios from "axios";
 
                 this.searchLoading = true;
                 try {
-                    const { data } = await axios.get('api/medicines/search', {
+                    const { data } = await axios.get('/api/medicines/search', {
                         params: { q, limit: 30 },
                         signal: this.abortCtrl.signal,
                         withCredentials: true,
