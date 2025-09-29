@@ -160,7 +160,7 @@ import axios from "axios";
         },
         methods: {
             onRowEditSave(event) {
-                const res = axios.patch(`api/update_price/${event.data.products.id}`, {
+                const res = axios.patch(`/api/update_price/${event.data.products.id}`, {
                     price: event.data.products.price,
                     name: event.data.products.name
                 }).then
